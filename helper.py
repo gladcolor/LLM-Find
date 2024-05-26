@@ -204,7 +204,7 @@ def extract_code_from_str(LLM_reply_str, verbose=False):
     return python_code
 
 
-def execute_complete_program(code: str, try_cnt: int = 10) -> str:
+def execute_complete_program(code: str, try_cnt: int, task: str, model_name: str) -> str:
     
 
     count = 0
@@ -212,7 +212,7 @@ def execute_complete_program(code: str, try_cnt: int = 10) -> str:
         print(f"\n\n-------------- Running code (trial # {count + 1}/{try_cnt}) --------------\n\n")
         try:
             count += 1
-            compiled_code = compile(code, 'Data downloading program', 'exec')
+            compiled_code = compile(code, 'Complete program', 'exec')
             exec(compiled_code, globals())  # #pass only globals() not locals()
             #!!!!    all variables in code will become global variables! May cause huge issues!     !!!!
             print("\n\n--------------- Done ---------------\n\n")
@@ -228,12 +228,15 @@ def execute_complete_program(code: str, try_cnt: int = 10) -> str:
             # cl, exc, tb = sys.exc_info()
 
             # print("An error occurred: ", traceback.extract_tb(tb))
+            # 
 
             if count == try_cnt:
                 print(f"Failed to execute and debug the code within {try_cnt} times.")
                 return code
 
-            debug_prompt = get_debug_prompt(exception=err, code=code)
+            # print("code in execute_complete_program():", code)
+# 
+            debug_prompt = get_debug_prompt(exception=err, code=code, task=task)
             print("Sending error information to LLM for debugging...")
             # print("Prompt:\n", debug_prompt)
             response = get_LLM_reply(prompt=debug_prompt,
@@ -248,14 +251,16 @@ def execute_complete_program(code: str, try_cnt: int = 10) -> str:
     return code
 
 
-def get_debug_prompt(exception, code):
+def get_debug_prompt(exception, code, task):
         etype, exc, tb = sys.exc_info()
         exttb = traceback.extract_tb(tb)  # Do not quite understand this part.
         # https://stackoverflow.com/questions/39625465/how-do-i-retain-source-lines-in-tracebacks-when-running-dynamically-compiled-cod/39626362#39626362
 
+      
+        print("code in get_debug_prompt:", code)
         ## Fill the missing data:
         exttb2 = [(fn, lnnr, funcname,
-                   (code.splitlines()[lnnr - 1] if fn == 'Data downloading program'
+                   (code.splitlines()[lnnr - 1] if fn == 'Complete program'
                     else line))
                   for fn, lnnr, funcname, line in exttb]
 

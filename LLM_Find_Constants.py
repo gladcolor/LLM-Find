@@ -27,11 +27,13 @@ selection_reply_example = """{'Explaination': "According to the use requests of 
 
 select_requirements = [
     "Return the exact name of the data source as the given names.",
-     "If a data source is given in the task, e.g., OpenStreetMap or Census Bureau, you need to select that given data source.",
+    "If a data source is given in the task, e.g., OpenStreetMap or Census Bureau, you need to select that given data source.",
+    "If you need to download the administrative boundary of a place and without mentioning the data sources, you can get data from OpenStreetMap."
+    "If you need to download the US Census tract and block group boundaries, download them from Census Bureau."
     "Follow the given JSON format.",
     "If you cannot find a suitable data source in the given sources, return a data source you think is most appropriate.",
     "DO NOT make fake data source. If you cannot find any suitable data source, return 'Unknown' as for the 'Selected data source' key in the reply JSON format. DO NOT use ```json and ```",
-    "If you need to download the administrative boundary of a place and without mentioning the data sources, you can get data from OpenStreetMap."
+    
 ]
 
 
@@ -44,14 +46,22 @@ data_source_dict = {
 
 #------------- Handbook for OpenStreetMap
 handbooks = {'OpenStreetMap':[
-                                        "If you need to download the administrative boundary of a place from OpenStreetMap, please use a Python package named 'OSMnx' by this code line: `ox.geocode_to_gdf(query, which_result=None, by_osmid=False, buffer_dist=None)`. This method is fast. ",
-                                        "If you need to download POIs, you may need to find out the most suitable methods.",
-                                        "If the file saving format is not given in the tasks, save the downloaded files into GeoPackage format.",
-                                        "You need to create Python code to download and save the data. Another program will execute your code directly."
-                                        " Put your reply into a Python code block, Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).",
-                                        "The download code is only in a function named 'download_data()'. The last line is to execute this function.",
-                                        "When downloading OSM data, no need to use 'building' tags if it is not asked for.",
-                                    ],
+                "If you need to download the administrative boundary of a place from OpenStreetMap, please use a Python package named 'OSMnx' by this code line: `ox.geocode_to_gdf(query, which_result=None, by_osmid=False, buffer_dist=None)`. This method is fast. ",
+                "If you need to download POIs, you may use the Overpass API, which is faster than OSMnx library. Code example is: `area['SO3166-2'='US-PA']->.searchArea;(nwr[amenity='hospital'](area.searchArea););out center;`",
+               "If you need to download polylines, you may use the Overpass API, which is faster than OSMnx library.",
+               "You need to use OSMnx Python package to download cities, neighborhoods, boroughs, counties, states, or countries. The code is: `gdf = ox.geocode_to_gdf(places)`. The Overpass API `area['name'='target_placename']` usually return emplty results; do not use it. You usually need to obtain the boundaries first then use it to filter out the target data.",
+               "You can use the bounding box in the Overpass query to filter out the data extent (`west, south, east, north = ox.geocode_to_gdf(place_name).unary_union.bounds`), and using the tags to filter out the data type. DO NOT download all the data first then filter, which it is not feasible.",
+                "Only use OSMnx to obtain the place boundaries; do no use it to download networks or POIs as it is very slow! Instead, use Overpass Query (endpoint: https://overpass-api.de/api/interpreter).",
+                "If using Overpass API, you need to output the geometry, i.e., using `out geom;` in the query. The geometry can be accessed by `returned_json['elements']['geometry']`; the gemotry is a list of points as `{'lat': 30.5, 'lon': 114.2}`.",
+                "Use GeoPandas, rather than OSGEO package to create vectors.",
+                "If the file saving format is not given in the tasks, save the downloaded files into GeoPackage format.",
+                "You need to create Python code to download and save the data. Another program will execute your code directly."
+                " Put your reply into a Python code block, Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).",
+                "The download code is only in a function named 'download_data()'. The last line is to execute this function.",
+                "When downloading OSM data, no need to use 'building' tags if it is not asked for.",
+                "Need to keep most attributes of the downloaded data, such as place name, street name, road type and level.",
+                
+            ],
 
              #------------- Handbook for US Census Bureau
                 'US_Census':[
@@ -78,9 +88,11 @@ download_task_prefix = r'download geo-spatial data from the given data source fo
 
 download_reply_example = """
 ```python
+import geopandas as gpd
+import osmnx as ox
 def download_data():
-    # data downloading code here
-    # downloaded code here
+    # data downloading code 
+    # downloaded code 
 download_data()
 ```
 """
