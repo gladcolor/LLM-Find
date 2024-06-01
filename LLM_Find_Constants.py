@@ -18,8 +18,9 @@ select_task_prefix = r'select a suitable data source from the given list to down
 
 data_sources = """
 1. OpenStreetMap. You can download the administrative boundaries, street networks, points of interest (POIs) from OpenStreetMap.
-2. US Census Bureau. It provides the Census and demographic data, US administrative boundaries (nation, state, county, tract, and block group level; also metroplitan statistic areas.
-3. US COVID-19 data by New York Times. Cumulative counts of COVID-19 cases and deaths in the United States, at the state and county level, over time. 
+2. US Census Bureau boundary. It provides the US administrative boundaries (nation, state, county, tract, and block group level; also metroplitan statistic areas.
+3. US Census Bureau demography. It provides the demographic and socio-economic data, such as popultion, gender, income, education and race.
+4. US COVID-19 data by New York Times. Cumulative counts of COVID-19 cases and deaths in the United States, at the state and county level, over time. 
 """
 
 selection_reply_example = """{'Explaination': "According to the use requests of US state administrative boundary from OpenStreetMap, I should download data from OpenStreetMap.", "Selected data source": 'OpenStreetMap'}
@@ -39,7 +40,8 @@ select_requirements = [
 
 data_source_dict = {
     "OpenStreetMap": {"ID": "OpenStreetMap"},
-    "US Census Bureau": {"ID": "US_Census"},
+    "US Census Bureau boundary": {"ID": "US_Census_boundary"},
+    "US Census Bureau demography": {"ID": "US_Census_demography"},
     "US COVID-19 data by New York Times": {"ID": "COVID_NYT"},
     "Unknown": {"ID": "Unknown"},
 }
@@ -63,8 +65,8 @@ handbooks = {'OpenStreetMap':[
                 
             ],
 
-             #------------- Handbook for US Census Bureau
-                'US_Census':[
+             #------------- Handbook for US Census Bureau boundary
+                'US_Census_boundary':[
                     "If the place of boundaries request is in the USA, you can download boundaries from Census Bureau, which is official and better than OSM. An example link is: https://www2.census.gov/geo/tiger/GENZ2021/shp/cb_{year}_{extend}_{level}_500k.zip. You can change the year and administrative level (state/county) in link accordingly. 'year' is 4-digit. 'extend' can be 'us' or 2-digit state FIPS; when 'extend' = 'us', 'level' can be 'state' and 'county' only, and the downloaded data is national. When 'extend' is 2-digit state FIPS, 'level' can be 'tract' and 'bg' only. 'bg' refers to block groups. E.g., do not set 'extend' to 2-digit FIPS code when download county boundaries for a state. If you need to download counties boundaries, 'extend' must be 'us'.",
                     "If the file saving format is not given in the tasks, save the downloaded files into GeoPackage format.",
                     "You need to create Python code to download and save the data. Another program will execute your code directly."
@@ -72,7 +74,20 @@ handbooks = {'OpenStreetMap':[
                     "The download code is only in a function named 'download_data()'. The last line is to execute this function.",
                     "If using GeoPandas to load a zipped ESRI shapefile from a URL, the correct method is `gpd.read_file(URL)`. DO NOT download and unzip the file.",
                     "Note Python package 'pandas' has no attribute or method of 'StringIO'.",
+                    
                 ],
+
+
+                          #------------- Handbook for US Census Bureau demographic
+                'US_Census_demography':[
+                    "If you need an API key, you can use this: b12026d61228a4b0d441ae7aa93f1ea222877503",
+                    "Store the returns into CSV files, please make sure using descriptive headers without special characters.",
+                    "Add the year of the data to the saved CSV files.",
+                    "Prefer the office APIs, do not use other Python pacakges such as `census`.",
+                    # "",
+                    
+                ],
+             
     
             }
 
