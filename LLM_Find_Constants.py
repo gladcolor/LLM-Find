@@ -58,10 +58,11 @@ handbooks = {'OpenStreetMap':[
                 "Use GeoPandas, rather than OSGEO package to create vectors.",
                 "If the file saving format is not given in the tasks, save the downloaded files into GeoPackage format.",
                 "You need to create Python code to download and save the data. Another program will execute your code directly."
-                " Put your reply into a Python code block, Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).",
+                "Put your reply into a Python code block, Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).",
                 "The download code is only in a function named 'download_data()'. The last line is to execute this function.",
                 "When downloading OSM data, no need to use 'building' tags if it is not asked for.",
                 "Need to keep most attributes of the downloaded data, such as place name, street name, road type and level.",
+                "Throw an error if the the program fails to download the data; no need to handle the exceptions.",
                 
             ],
 
@@ -70,10 +71,11 @@ handbooks = {'OpenStreetMap':[
                     "If the place of boundaries request is in the USA, you can download boundaries from Census Bureau, which is official and better than OSM. An example link is: https://www2.census.gov/geo/tiger/GENZ2021/shp/cb_{year}_{extend}_{level}_500k.zip. You can change the year and administrative level (state/county) in link accordingly. 'year' is 4-digit. 'extend' can be 'us' or 2-digit state FIPS; when 'extend' = 'us', 'level' can be 'state' and 'county' only, and the downloaded data is national. When 'extend' is 2-digit state FIPS, 'level' can be 'tract' and 'bg' only. 'bg' refers to block groups. E.g., do not set 'extend' to 2-digit FIPS code when download county boundaries for a state. If you need to download counties boundaries, 'extend' must be 'us'.",
                     "If the file saving format is not given in the tasks, save the downloaded files into GeoPackage format.",
                     "You need to create Python code to download and save the data. Another program will execute your code directly."
-                    " Put your reply into a Python code block, Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).",
+                    "Put your reply into a Python code block, Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).",
                     "The download code is only in a function named 'download_data()'. The last line is to execute this function.",
                     "If using GeoPandas to load a zipped ESRI shapefile from a URL, the correct method is `gpd.read_file(URL)`. DO NOT download and unzip the file.",
                     "Note Python package 'pandas' has no attribute or method of 'StringIO'.",
+                    "Throw an error if the the program fails to download the data; no need to handle the exceptions.",
                     
                 ],
 
@@ -81,9 +83,21 @@ handbooks = {'OpenStreetMap':[
                           #------------- Handbook for US Census Bureau demographic
                 'US_Census_demography':[
                     "If you need an API key, you can use this: b12026d61228a4b0d441ae7aa93f1ea222877503",
-                    "Store the returns into CSV files, please make sure using descriptive headers without special characters.",
-                    "Add the year of the data to the saved CSV files.",
                     "Prefer the office APIs, do not use other Python pacakges such as `census`.",
+                    "Store the returns into CSV files, please make sure using descriptive headers without special characters. The header should come from the `label` value in the variable descriptions in https://api.census.gov/data/2021/acs/acs5/variables.json. Note that you may need to change the year accordingly. You need to download this JSON file and read the variable labels from it.",
+                    "Add the year of the data as a column to the saved CSV files.",     
+                    "Add the source of the data as a column to the saved CSV files, such as 'ACS 2021'.",  
+                    "Put your reply into a Python code block. Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).",
+                    "The download code is only in a function named 'download_data()'. The last line is to execute this function.",
+                    "Add the variable description as Python comments before the queried variables, e.g. `# B15001_001E:Total population`.",
+                    "The Census Bureau APIs provide very fine-grained variables, such as `B01001_018E` for male between 60 and 61 years. Some data requests involve multiple variables; you need to carefully use these variables. No more or no less. E.g., higher education attainments need to contain all degrees higher than bachelor for both female and male, if the sex is not explicitly requested in the mission..",
+                    "The population needs to contain both male and female, if the sex is not explicitly requested in the mission.",
+                    "Throw an error if  the program fails to download the data; no need to handle the exceptions.",            
+                    "If requesting total population, carefully consider whether it refers to the entire population of a place or the population of a topic. E.g., B15002_001E (label: Estimate!!Total:) refers to the total population of the concept of 'SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER'; B01001_001E (label: Estimate!!Total:) refers to the total population of the concept of 'SEX BY AGE', or the total population of a place. Make sure your carefully understand which `total population` is requested in the mission.",
+                    # "Use the column names from API response, do not name the columns yourself.",
+                    "If the saved file name is given, do not change the file name.",
+                    # "When requesting educational attainments, B15002 (for population > 25-year) is more commonly used than B15001 (for population > 18-year).",
+                    # ",
                     # "",
                     
                 ],
