@@ -204,7 +204,7 @@ def extract_code_from_str(LLM_reply_str, verbose=False):
     return python_code
 
 
-def execute_complete_program(code: str, try_cnt: int, task: str, model_name: str) -> str:
+def execute_complete_program(code: str, try_cnt: int, task: str, model_name: str, handbook_str:str) -> str:
     
 
     count = 0
@@ -236,7 +236,7 @@ def execute_complete_program(code: str, try_cnt: int, task: str, model_name: str
 
             # print("code in execute_complete_program():", code)
 # 
-            debug_prompt = get_debug_prompt(exception=err, code=code, task=task)
+            debug_prompt = get_debug_prompt(exception=err, code=code, task=task, handbook_str=handbook_str)
             print("Sending error information to LLM for debugging...")
             # print("Prompt:\n", debug_prompt)
             response = get_LLM_reply(prompt=debug_prompt,
@@ -251,7 +251,7 @@ def execute_complete_program(code: str, try_cnt: int, task: str, model_name: str
     return code
 
 
-def get_debug_prompt(exception, code, task):
+def get_debug_prompt(exception, code, task, handbook_str):
         etype, exc, tb = sys.exc_info()
         exttb = traceback.extract_tb(tb)  # Do not quite understand this part.
         # https://stackoverflow.com/questions/39625465/how-do-i-retain-source-lines-in-tracebacks-when-running-dynamically-compiled-cod/39626362#39626362
@@ -281,6 +281,7 @@ def get_debug_prompt(exception, code, task):
                           f"Your task: correct the code of a program according to the error information, then return the corrected and completed program. \n\n" + \
                           f"Requirement: \n {debug_requirement_str} \n\n" + \
                           f"The given code is used for this task: {task} \n\n" + \
+                          f"The technical guidelines for the code: \n {handbook_str} \n\n" + \
                           f"The error information for the code is: \n{str(error_info_str)} \n\n" + \
                           f"The code is: \n{code}"
 
