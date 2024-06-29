@@ -71,8 +71,9 @@ def create_download_prompt(task, selected_data_source, handbook_str):
     prompt =  f"Your role: {constants.download_role} \n" + \
               f"Your mission: {constants.download_task_prefix}: " + f"{task}\n\n" + \
               f"Data source:{selected_data_source} \n" + \
-              f"Handbook: \n{handbook_str} \n\n" + \
-              f'Your reply example: {constants.download_reply_example}'
+              f'Your reply example: {constants.download_reply_example}\n' + \
+              f"Technical handbook: \n{handbook_str}"
+              
 
     
     return prompt 

@@ -1,4 +1,5 @@
 import configparser
+import LLM_Find_Codebase as codebase
 config = configparser.ConfigParser()
 config.read('config.ini')
 
@@ -54,13 +55,17 @@ data_source_dict = {
     "Unknown": {"ID": "Unknown"},
 }
 
+
+
+
 #------------- Handbook for OpenStreetMap
 handbooks = {'OpenStreetMap':[
                 "If you need to download the administrative boundary of a place from OpenStreetMap, please use a Python package named 'OSMnx' by this code line: `ox.geocode_to_gdf(query, which_result=None, by_osmid=False, buffer_dist=None)`. This method is fast. ",
                 "If you need to download POIs, you may use the Overpass API, which is faster than OSMnx library. Code example is: `area['SO3166-2'='US-PA']->.searchArea;(nwr[amenity='hospital'](area.searchArea););out center;`",
                "If you need to download polylines, you may use the Overpass API, which is faster than OSMnx library.",
                "You need to use OSMnx Python package to download a city, neighborhood, borough, county, state, or country. The code is: `gdf = ox.geocode_to_gdf(places)`. The Overpass API `area['name'='target_placename']` usually return emplty results; do not use it if you can use OSMnx. You usually need to obtain the boundaries first then use it to filter out the target data.",
-               "You can use the bounding box in the Overpass query to filter out the data extent (`west, south, east, north = ox.geocode_to_gdf(place_name).unary_union.bounds`), and using the tags to filter out the data type. DO NOT download all the data first then filter, which it is not feasible. After getting the data in a bounding box, you can use GeoPandas and the boundary to filter out the data in the target area.",
+               # "You can use the bounding box in the Overpass query to filter out the data extent (`west, south, east, north = ox.geocode_to_gdf(place_name).unary_union.bounds`), and using the tags to filter out the data type. DO NOT download all the data first then filter, which it is not feasible. After getting the data in a bounding box, you can use GeoPandas and the boundary to filter out the data in the target area: `gpd.sjoin(gdf, boundary, how='inner', op='within')`.",
+                "If you need to use a boundary to filter feature in GeoPandas, this is the code: `gpd.sjoin(gdf, boundary, how='inner', op='within')`.",
                 "If you need to download multiple administrative boundaries at the same level e.g., states or provinces, DO NOT use OSMnx because it is slow. You can use Overpass API. Example code: `area['ISO3166-1'='US'][admin_level=2]->.us;(relation(area.us)['admin_level'='4'];);out geom;`. Overpass API is more quick and simple; you only need to carefully set up the administrative level.",
                 "Only use OSMnx to obtain the place boundaries; do no use it to download networks or POIs as it is very slow! Instead, use Overpass Query (endpoint: https://overpass-api.de/api/interpreter).",
                 "If using Overpass API, you need to output the geometry, i.e., using `out geom;` in the query. The geometry can be accessed by `returned_json['elements']['geometry']`; the gemotry is a list of points as `{'lat': 30.5, 'lon': 114.2}`.",
@@ -72,6 +77,7 @@ handbooks = {'OpenStreetMap':[
                 "When downloading OSM data, no need to use 'building' tags if it is not asked for.",
                 "Need to keep most attributes of the downloaded data, such as place name, street name, road type and level.",
                 "Throw an error if the the program fails to download the data; no need to handle the exceptions.",
+               f"This is a program for your reference, note that you can improve it: {codebase.OpenStreetMap_code_sample_2}",
                 
             ],
 
@@ -93,24 +99,31 @@ handbooks = {'OpenStreetMap':[
                 'US_Census_demography':[
                     f"If you need an API key, you can use this: {US_Census_key}",
                     "Prefer the office APIs, do not use other Python pacakges such as `census`. This is an example: https://api.census.gov/data/2019/acs/acs1?get=NAME,B01001_001E&for=state:*",
-                    "Store the returns into CSV files, please make sure using descriptive headers without special characters. The header should come from the `label` value in the variable descriptions in https://api.census.gov/data/2021/acs/acs5/variables.json. Note that you may need to change the year and dataset accordingly. You need to download this JSON file and read the variable labels from it.",
+                    "Store the returns into CSV files.",
+                    "Use 'variable_name + label' as descriptive headers without special characters; e.g.'B01001_002E:Total:!!Male:', the variable label should come from the `label` value in the variable descriptions in https://api.census.gov/data/2022/acs/acs5/variables.json. Note that you may need to change the year and dataset accordingly. You need to download this JSON file and read the variable labels from it. Remove any 'Estimate!!' of the labels in variables.json file.",
                     "Add the year of the data as a column to the saved CSV files.",     
                     "Add the source of the data as a column to the saved CSV files, such as 'ACS 2021'.",  
+                    "The variable column names in the saved CSV files should be 'B01001_002E:Total:!!Male:', containing the variable ID and label.",
                     "Put your reply into a Python code block. Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).",
                     "The download code is only in a function named 'download_data()'. The last line is to execute this function.",
                     "Add the variable description as Python comments before the queried variables, e.g. `# B15001_001E:Total population`.",
                     "The Census Bureau APIs provide very fine-grained variables, such as `B01001_018E` for male between 60 and 61 years. Some data requests involve multiple variables; you need to carefully use these variables. No more or no less. E.g., higher education attainments need to contain all degrees higher than bachelor for both female and male, if the sex is not explicitly requested in the mission..",
                     "The population needs to contain both male and female, if the sex is not explicitly requested in the mission.",
                     "DO not query only male or female population if the sex is not explicitly requested in the mission.",
-                    "Throw an error if  the program fails to download the data; no need to handle the exceptions.",  
+                    "DO NOT handle any exceptions since we need to error information for debug.",  
                     "Keep the identifiers of downloaded data: for states and counties, names and FIPS are required; for tract, blockgroup, only FIPS is needed.",
                     "Note that in the API response headers, 'NAME' can refer to state name, 'state' refers to FIPS, not the state name. Do not mix up!",  # 'STNAME' or 
+                    "In the GET request, the parameters 'state' and 'county' are not included.",
                     "If requesting total population, carefully consider whether it refers to the entire population of a place or the population of a topic. E.g., B15002_001E (label: Estimate!!Total:) refers to the total population of the concept of 'SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER'; B01001_001E (label: Estimate!!Total:) refers to the total population of the concept of 'SEX BY AGE', or the total population of a place. Make sure you carefully understand which `total population` is requested in the mission.",
                     "Carefully think whether the requested data needs to combine multiple Census variables. For example, 'senior population' and 'higher education attainment' needs retrieve multiple variables across age, gender and degree attainment.",
                     "Sometimes you do not need to retrieve multiple variables, since some variables may include others. E.g., B15003_022E (Estimate!!Total:!!Bachelor's degree) consists of B15002_015E (Estimate!!Total:!!Male:!!Bachelor's degree) and B15002_032E (Estimate!!Total:!!Female:!!Bachelor's degree). You can retrieve less variable in such occasions.",
+                    "Please return the total population/household along with the requested sub group populations to compute the ratio, which is usually needed in most analyses.",
+                    "FIPS or GEOID columns may be str type with leading zeros (digits: state: 2, county: 5, tract: 11, block group: 12).",
                     # "Use the column names from API response, do not name the columns yourself.",
                     "If the saved file name is given, do not change the file name.",
-                    # "When requesting educational attainments, B15002 (for population > 25-year) is more commonly used than B15001 (for population > 18-year).",       
+                    # "When requesting educational attainments, B15002 (for population > 25-year) is more commonly used than B15001 (for population > 18-year).",     
+                    f"This is a brief variable summary for your reference: {codebase.Census_variables}",
+                    f"This is a program for your reference, note that you can improve it: {codebase.US_Census_demography_code_sample}",
                 ],
 
                                        #------------- Handbook for US COVID-19 data by New York Times
@@ -136,24 +149,32 @@ handbooks = {'OpenStreetMap':[
                     "API calls per minute is 3000, so make your program sleep for a while if you request too many times in a minute.",
                     "Save the results in a CSV file; columns include place name, date (YYYY-MM-DD), hour (e.g., '01'), and all the returned weather variables in separate columns, including sub-levels in all top-levels, such as 'main' and 'weather'. Using '_' to join the top- and sub-levels, e.g., 'main_temp'. Note that the 'weather' node has a list value, e.g., `'weather': [ {'id': 501,'main': 'Rain', 'description': 'moderate rain', 'icon': '10n' }]`. Other nodes have a dictionary value, e.g., `'main': { 'temp': 275.45, 'feels_like': 271.7, 'pressure': 1014, 'humidity': 74, 'temp_min': 274.26, 'temp_max': 276.48}`. Please handle the 'weather' node correctly. ",
                     "Using Python code to numerate the returned sub-level weather variables, rather than using your own memory. ",
+                    
                 ],
                 # Note: GPT-4o seems know the API well, for example, the historical one week limit and UNIX time stamp, but it cannot know the current time.
 
                                                     #------------- Handbook for ESRI World imagery (for export) -----
                 'ESRI_world_imagery':[
-                    "The endpoint is: https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{x}/{y}. 'x' is the row number from the top, 'y' is the column number from the left.",
-                    "You need to download the image tiles into the given folder (name them as 'z-x-y.jpg'), and then mosaic them into a single TIFF image with jpeg compression.",
+                    "The endpoint is: https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{row}/{col}. 'row' is the row number from the top, 'col' is the column number from the left. The map projection is WGS 1984 Web Mercator (auxiliary sphere), EPSG: 3857.",
+                    "You need to download the image tiles into the given folder (name them as 'z-row-col.jpg'), and then mosaic them into a single TIFF image with jpeg compression; also save a .jpw file for tiles to record the image locations for further merge. The mosaic result needs a .tfw file.",
+                    "You will receive a place name or a bounding box of the target area.",
                     "Put your reply into a Python code block. Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).",
                     "The download code is only in a function named 'download_data()'. The last line is to execute this function; do not use `if __name__ == '__main__':`.",
-                    "You can use OSMnx Python package to download the boundary of the request place, then use boundary's bounding box to determine the extent of the imagery. Example code: `gdf = ox.geocode_to_gdf(places)`.",
+                    "You can use OSMnx Python package to download the boundary of the request place, then use boundary's bounding box to determine the extent of the imagery. Example code: `minx, miny, maxx, maxy = ox.geocode_to_gdf(places).total_bounds`.",
+                    "The tile's row and col can be calculated by: `tile_col = int((lon + 180.0) / 360.0 * n); tile_row = int((1.0 - np.log(np.tan(np.radians(lat)) + 1 / np.cos(np.radians(lat))) / np.pi) / 2.0 * n)`.",
+                    "Remember how to do name the tiles since you need to mosaic them later.",
+                    "DO NOT handle any exceptions since we need to error information for debug.",  
+                    f"This is a program for your reference, note that you can improve it: {codebase.ESRI_world_imagery_code_sample}",
                    
                 ],
              
             }
 
+
+
  
 #------------- download data from a perticular data source
-download_role = r'''A professional Python programmer in geographic information science (GIScience). You have worked on GIScience for more than 20 years and know every detail and pitfall when collecting data and coding. You know which websites you can get suitable spatial data and know the methods or tricks to download data, such as OpenStreetMap, Census Bureau, or various APIs. You are also experienced in processing the downloaded data, including saving them in suitable formats, map projections, and creating detailed and useful meta-data. When downloading geo-spatial data, the handbook for a perticular data source is provided, you can follow it, and write Python code carefully to download the data. 
+download_role = r'''A professional Python programmer in geographic information science (GIScience). You have worked on GIScience for more than 20 years and know every detail and pitfall when collecting data and coding. You know which websites you can get suitable spatial data and know the methods or tricks to download data, such as OpenStreetMap, Census Bureau, or various APIs. You are also experienced in processing the downloaded data, including saving them in suitable formats, map projections, and creating detailed and useful meta-data. When downloading geo-spatial data, the technical handbook for a perticular data source is provided, you can follow it, and write Python code carefully to download the data. 
 '''
 
 
@@ -211,8 +232,8 @@ debug_requirement = [
                         "Remember the variable, column, and file names used in ancestor functions when using them, such as joining tables or calculating.",
                         # "When joining tables, convert the involved columns to string type without leading zeros. ",
                         # "If using colorbar for GeoPandas or Matplotlib visualization, set the colorbar's height or length as the same as the plot for better layout.",
-                        "When doing spatial joins, remove the duplicates in the results. Or please think about whether it needs to be removed.",
-                        "Map grid, legend, or colorbar need to show the unit.",
+                        # "When doing spatial joins, remove the duplicates in the results. Or please think about whether it needs to be removed.",
+                        # "Map grid, legend, or colorbar need to show the unit.",
                         'If a Python package is not installed, add the install command such as "pip" at the beginning of the revised code.',
                         # "Show a progressbar (e.g., tqdm in Python) if loop more than 200 times, also add exception handling for loops to make sure the loop can run.",
                         # "When crawl the webpage context to ChatGPT, using Beautifulsoup to crawl the text only, not all the HTML file.",
@@ -221,13 +242,13 @@ debug_requirement = [
                         "If using GeoPandas for spatial joining, the arguements are: geopandas.sjoin(left_df, right_df, how='inner', predicate='intersects', lsuffix='left', rsuffix='right', **kwargs), how: the type of join, default ‘inner’, means use intersection of keys from both dfs while retain only left_df geometry column. If 'how' is 'left': use keys from left_df; retain only left_df geometry column, and similarly when 'how' is 'right'. ",
                         "Note geopandas.sjoin() returns all joined pairs, i.e., the return could be one-to-many. E.g., the intersection result of a polygon with two points inside it contains two rows; in each row, the polygon attribute is the same. If you need of extract the polygons intersecting with the points, please remember to remove the duplicated rows in the results.",
                         # "GEOID in US Census data and FIPS (or 'fips') in Census boundaries are integer with leading zeros. If use pandas.read_csv() to GEOID or FIPS (or 'fips') columns from read CSV files, set the dtype as 'str'.",
-                         "Before using Pandas or GeoPandas columns for further processing (e.g. join or calculation), drop recoreds with NaN cells in that column, i.e., df.dropna(subset=['XX', 'YY']).",
+                         # "Before using Pandas or GeoPandas columns for further processing (e.g. join or calculation), drop recoreds with NaN cells in that column, i.e., df.dropna(subset=['XX', 'YY']).",
                         # "Drop rows with NaN cells, i.e., df.dropna(),  if the error information reports NaN related errors."
-                        "Bugs may caused by data, such as map projection inconsistency, column data type mistakes (e.g., int, flota, str), spatial joining type (e.g., inner, outer), and NaN cells.",
-                        "When read FIPS or GEOID columns from CSV files, read those columns as str or int, never as float.",
+                        # "Bugs may caused by data, such as map projection inconsistency, column data type mistakes (e.g., int, flota, str), spatial joining type (e.g., inner, outer), and NaN cells.",
+                        # "When read FIPS or GEOID columns from CSV files, read those columns as str or int, never as float.",
                         "FIPS or GEOID columns may be str type with leading zeros (digits: state: 2, county: 5, tract: 11, block group: 12), or integer type without leading zeros. Thus, when joining using they, you can convert the integer colum to str type with leading zeros to ensure the success.",
-                        "If you need to make a map and the map size is not given, set the map size to 15*10 inches.",
-                        'Save the generated map as the file of "output_map.png"; the DPI is 100.',
+                        # "If you need to make a map and the map size is not given, set the map size to 15*10 inches.",
+                        # 'Save the generated map as the file of "output_map.png"; the DPI is 100.',
                         ]
 
  
