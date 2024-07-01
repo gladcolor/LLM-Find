@@ -138,8 +138,11 @@ handbooks = {'OpenStreetMap':[
                 'OpenWeather':[
                     f"The OpenWeather API key is: {OpenWeather_key}",
                     "The endpoint for current weather is: https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=metric&appid={API key}",  
-                    "The forecast weather end point is: https://pro.openweathermap.org/data/2.5/forecast/hourly?lat={lat}&lon={lon}&units=metric&appid={API key}",
-                    "The endpoints for historical weather are 1) https://history.openweathermap.org/data/2.5/history/city?lat={lat}&lon={lon}&type=hour&start={start}&end={end}&units=metric&appid={API key}, 2) https://history.openweathermap.org/data/2.5/history/city?lat={lat}&lon={lon}&type=hour&start={start}&cnt={cnt}&units=metric&appid={API key}. Each query can get one week data at most.",
+                    "Hourly forecast for 4 days (96 timestamps) end point is: https://pro.openweathermap.org/data/2.5/forecast/hourly?lat={lat}&lon={lon}&units=metric&appid={API key}.",
+                    "Daily Forecast (16 days at most) end point is: api.openweathermap.org/data/2.5/forecast/daily?lat={lat}&lon={lon}&cnt={cnt}&appid={API key}.",
+                    "Climate Forecast (30 days) end point is: https://pro.openweathermap.org/data/2.5/forecast/climate?lat={lat}&lon={lon}&appid={API key}.",
+                    "The endpoints for historical weather are 1) https://history.openweathermap.org/data/2.5/history/city?lat={lat}&lon={lon}&type=hour&start={start}&end={end}&units=metric&appid={API key}, 2) https://history.openweathermap.org/data/2.5/history/city?lat={lat}&lon={lon}&type=hour&start={start}&cnt={cnt}&units=metric&appid={API key}.",
+                    "Each query can get one week data at most, including historical and forecast data. You may need to query multiple times if the requested period is longer than a week.",
                     "If the data request does not mention using historical/current/forecast API, you need to get the current time to determine using the forecast or historical API endpoint.",
                     "Need to use metric units. E.g., the temperature units should be Celsius.",
                     "Do not use 'One Call API' since we have not subscribed it.",
@@ -149,6 +152,7 @@ handbooks = {'OpenStreetMap':[
                     "API calls per minute is 3000, so make your program sleep for a while if you request too many times in a minute.",
                     "Save the results in a CSV file; columns include place name, date (YYYY-MM-DD), hour (e.g., '01'), and all the returned weather variables in separate columns, including sub-levels in all top-levels, such as 'main' and 'weather'. Using '_' to join the top- and sub-levels, e.g., 'main_temp'. Note that the 'weather' node has a list value, e.g., `'weather': [ {'id': 501,'main': 'Rain', 'description': 'moderate rain', 'icon': '10n' }]`. Other nodes have a dictionary value, e.g., `'main': { 'temp': 275.45, 'feels_like': 271.7, 'pressure': 1014, 'humidity': 74, 'temp_min': 274.26, 'temp_max': 276.48}`. Please handle the 'weather' node correctly. ",
                     "Using Python code to numerate the returned sub-level weather variables, rather than using your own memory. ",
+                    "Store the requested place name or lat/lon in the result file.",
                     
                 ],
                 # Note: GPT-4o seems know the API well, for example, the historical one week limit and UNIX time stamp, but it cannot know the current time.
