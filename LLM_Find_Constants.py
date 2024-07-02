@@ -60,13 +60,15 @@ data_source_dict = {
 
 #------------- Handbook for OpenStreetMap
 handbooks = {'OpenStreetMap':[
+               "In the requested area is given in an English name, you need to use `['name:en'='XX']` to filter the place in Overpass queries, otherwise you will get empty results. The `name` tag in OpenStreetMap usually is in the location language.",
                 "If you need to download the administrative boundary of a place from OpenStreetMap, please use a Python package named 'OSMnx' by this code line: `ox.geocode_to_gdf(query, which_result=None, by_osmid=False, buffer_dist=None)`. This method is fast. ",
                 "If you need to download POIs, you may use the Overpass API, which is faster than OSMnx library. Code example is: `area['SO3166-2'='US-PA']->.searchArea;(nwr[amenity='hospital'](area.searchArea););out center;`",
                "If you need to download polylines, you may use the Overpass API, which is faster than OSMnx library.",
-               "You need to use OSMnx Python package to download a city, neighborhood, borough, county, state, or country. The code is: `gdf = ox.geocode_to_gdf(places)`. The Overpass API `area['name'='target_placename']` usually return emplty results; do not use it if you can use OSMnx. You usually need to obtain the boundaries first then use it to filter out the target data.",
+               # 
                # "You can use the bounding box in the Overpass query to filter out the data extent (`west, south, east, north = ox.geocode_to_gdf(place_name).unary_union.bounds`), and using the tags to filter out the data type. DO NOT download all the data first then filter, which it is not feasible. After getting the data in a bounding box, you can use GeoPandas and the boundary to filter out the data in the target area: `gpd.sjoin(gdf, boundary, how='inner', op='within')`.",
                 "If you need to use a boundary to filter feature in GeoPandas, this is the code: `gpd.sjoin(gdf, boundary, how='inner', op='within')`.",
                 "If you need to download multiple administrative boundaries at the same level e.g., states or provinces, DO NOT use OSMnx because it is slow. You can use Overpass API. Example code: `area['ISO3166-1'='US'][admin_level=2]->.us;(relation(area.us)['admin_level'='4'];);out geom;`. Overpass API is more quick and simple; you only need to carefully set up the administrative level.",
+                
                 "Only use OSMnx to obtain the place boundaries; do no use it to download networks or POIs as it is very slow! Instead, use Overpass Query (endpoint: https://overpass-api.de/api/interpreter).",
                 "If using Overpass API, you need to output the geometry, i.e., using `out geom;` in the query. The geometry can be accessed by `returned_json['elements']['geometry']`; the gemotry is a list of points as `{'lat': 30.5, 'lon': 114.2}`.",
                 "Use GeoPandas, rather than OSGEO package to create vectors.",
@@ -234,6 +236,8 @@ debug_requirement = [
                         "Map projection conversion is only conducted for spatial data layers such as GeoDataFrame. DataFrame loaded from a CSV file does not have map projection information.",
                         "If join DataFrame and GeoDataFrame, using common columns, DO NOT convert DataFrame to GeoDataFrame.",
                         "Remember the variable, column, and file names used in ancestor functions when using them, such as joining tables or calculating.",
+                        "You can use OSMnx Python package to download a city, neighborhood, borough, county, state, or country. The code is: `gdf = ox.geocode_to_gdf(place)`. The Overpass API `area['name'='target_placename']` might return emplty results.",
+                        # "You usually need to obtain the boundaries first then use it to filter out the target data.",
                         # "When joining tables, convert the involved columns to string type without leading zeros. ",
                         # "If using colorbar for GeoPandas or Matplotlib visualization, set the colorbar's height or length as the same as the plot for better layout.",
                         # "When doing spatial joins, remove the duplicates in the results. Or please think about whether it needs to be removed.",
