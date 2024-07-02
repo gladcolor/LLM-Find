@@ -67,8 +67,7 @@ handbooks = {'OpenStreetMap':[
                # 
                # "You can use the bounding box in the Overpass query to filter out the data extent (`west, south, east, north = ox.geocode_to_gdf(place_name).unary_union.bounds`), and using the tags to filter out the data type. DO NOT download all the data first then filter, which it is not feasible. After getting the data in a bounding box, you can use GeoPandas and the boundary to filter out the data in the target area: `gpd.sjoin(gdf, boundary, how='inner', op='within')`.",
                 "If you need to use a boundary to filter feature in GeoPandas, this is the code: `gpd.sjoin(gdf, boundary, how='inner', op='within')`.",
-                "If you need to download multiple administrative boundaries at the same level e.g., states or provinces, DO NOT use OSMnx because it is slow. You can use Overpass API. Example code: `area['ISO3166-1'='US'][admin_level=2]->.us;(relation(area.us)['admin_level'='4'];);out geom;`. Overpass API is more quick and simple; you only need to carefully set up the administrative level.",
-                
+                "If you need to download multiple administrative boundaries at the same level e.g., states or provinces, DO NOT use OSMnx because it is slow. You can use Overpass API. Example code: `area['ISO3166-1'='US'][admin_level=2]->.us;(relation(area.us)['admin_level'='4'];);out geom;`. Overpass API is more quick and simple; you only need to carefully set up the administrative level.",                
                 "Only use OSMnx to obtain the place boundaries; do no use it to download networks or POIs as it is very slow! Instead, use Overpass Query (endpoint: https://overpass-api.de/api/interpreter).",
                 "If using Overpass API, you need to output the geometry, i.e., using `out geom;` in the query. The geometry can be accessed by `returned_json['elements']['geometry']`; the gemotry is a list of points as `{'lat': 30.5, 'lon': 114.2}`.",
                 "Use GeoPandas, rather than OSGEO package to create vectors.",
@@ -79,10 +78,11 @@ handbooks = {'OpenStreetMap':[
                 "When downloading OSM data, no need to use 'building' tags if it is not asked for.",
                 "Need to keep most attributes of the downloaded data, such as place name, street name, road type and level.",
                 "Throw an error if the the program fails to download the data; no need to handle the exceptions.",
+                "If you need to convert the OpenStreetMap returned JSON to GeoJSON, you can add this line to the OverPass query: `item ::=::,::geom=geom(),_osm_type=type(), ::id=id();`",
                f"This is a program for your reference, note that you can improve it: {codebase.OpenStreetMap_code_sample_2}",
                 
             ],
-
+ 
              #------------- Handbook for US Census Bureau boundary
                 'US_Census_boundary':[
                     "If the place of boundaries request is in the USA, you can download boundaries from Census Bureau, which is official and better than OSM. An example link is: https://www2.census.gov/geo/tiger/GENZ2021/shp/cb_{year}_{extend}_{level}_500k.zip. You can change the year and administrative level (state/county) in link accordingly. 'year' is 4-digit. 'extend' can be 'us' or 2-digit state FIPS; when 'extend' = 'us', 'level' can be 'state' and 'county' only, and the downloaded data is national. When 'extend' is 2-digit state FIPS, 'level' can be 'tract' and 'bg' only. 'bg' refers to block groups. E.g., do not set 'extend' to 2-digit FIPS code when download county boundaries for a state. If you need to download counties boundaries, 'extend' must be 'us'.",
@@ -261,5 +261,21 @@ debug_requirement = [
 
  
  
+''' 
+NOTE: AREA in Overpass API
+Areas are an extension of Overpass API: They constitute a new data type area beside the OSM data types node, way, and relation. So this data is not extracted and updated from the main API, but computed by a special process on the Overpass API server.
+https://wiki.openstreetmap.org/wiki/Overpass_API/Areas
 
+Thus, `area[tag=XX]` returns no polygons.
+
+## Convert the OSM JSON to GeoJSON:
+[out:json];
+( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
+  node(w);
+  relation(51.477,-0.001,51.478,0.001); );
+convert item ::=::,::geom=geom(),_osm_type=type(), ::id=id();
+out geom;
+// https://dev.overpass-api.de/overpass-doc/en/targets/formats.html#json
+// Not sure whether the conversion is correct, little official documents.
+'''
  
