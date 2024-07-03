@@ -276,6 +276,7 @@ Thus, `area[tag=XX]` returns no polygons.
 convert item ::=::,::geom=geom(),_osm_type=type(), ::id=id();
 out geom;
 // https://dev.overpass-api.de/overpass-doc/en/targets/formats.html#json
-// Not sure whether the conversion is correct, little official documents.
+// Not sure whether the conversion is correct, little official documents. 
+// Not good for polygons. GeoJSON results only contain polylines.
 '''
  
