@@ -27,7 +27,7 @@ Note:  We are still developing LLM-Find, and the ideas presented in the paper ma
 - LLM-Find will use the backed LLM (GPT-4o now) to generate and debug the data fetching program. GPT-4o's debugging ability is still weak. The default maximum attempt count is set to 10; modify this value is needed. 
 
 # Case studies
-Please play with the provided cases (~60), we also encourage you use your own cases. These case studies are designed to show the concepts of autonomous GIS. Please use GPT-4; the lower version of GPT will fail to generate the correct code and results. Note every time GPT-4 generates different outputs, your results may look different. Per our test, the generated program may not succeed every time, but there is about an 80% chance to run successfully. If input the generated prompts to the ChatGPT-4 chat box rather than API, the success rate will be much higher. We will improve the overall workflow of LLM-Geo, currently we do not push the entire historical conversation (i.e., sufficient information) to the GPT-4 API.
+Please play with the provided cases (~60), we also encourage you use your own cases. These case studies are designed to show the concepts of autonomous data fetching agents. Please use GPT-4o or above; the lower version of GPT will fail to generate the correct code and results. Note every time GPT-4o generates different outputs, your results may look different. Per our test, the generated program may not succeed at a chance about 10%; if so, please re-run all the cells again; no need to manually debug the code unless you like to do so. 
 
 
 # To Do
