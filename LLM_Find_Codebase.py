@@ -77,7 +77,7 @@ import json
 def download_data():
     # Define the endpoint and related configurations
     base_url = "https://api.census.gov/data/2021/acs/acs5"
-    api_key = "b12026d61228a4b0d441ae7aa93f1ea222877503"
+    api_key = "xxxx"
     dataset_year = "2021"
     dataset_source = f"ACS {dataset_year}"
     
