@@ -60,26 +60,26 @@ data_source_dict = {
 
 #------------- Handbook for OpenStreetMap
 handbooks = {'OpenStreetMap':[
-               "In the requested area is given in an English name, you need to use `['name:en'='XX']` to filter the place in Overpass queries, otherwise you will get empty results. The `name` tag in OpenStreetMap usually is in the location language.",
+               "If the requested area is given in an English name, you need to use `['name:en'='XX']` to filter the place in Overpass queries; otherwise you will get empty results. The `name` tag in OpenStreetMap usually is in the location language.",
                 "If you need to download the administrative boundary of a place from OpenStreetMap, please use a Python package named 'OSMnx' by this code line: `ox.geocode_to_gdf(query, which_result=None, by_osmid=False, buffer_dist=None)`. This method is fast. ",
                 "If you need to download POIs, you may use the Overpass API, which is faster than OSMnx library. Code example is: `area['SO3166-2'='US-PA']->.searchArea;(nwr[amenity='hospital'](area.searchArea););out center;`",
                "If you need to download polylines, you may use the Overpass API, which is faster than OSMnx library.",
                # 
                # "You can use the bounding box in the Overpass query to filter out the data extent (`west, south, east, north = ox.geocode_to_gdf(place_name).unary_union.bounds`), and using the tags to filter out the data type. DO NOT download all the data first then filter, which it is not feasible. After getting the data in a bounding box, you can use GeoPandas and the boundary to filter out the data in the target area: `gpd.sjoin(gdf, boundary, how='inner', op='within')`.",
-                "If you need to use a boundary to filter feature in GeoPandas, this is the code: `gpd.sjoin(gdf, boundary, how='inner', op='within')`.",
-                "If you need to download multiple administrative boundaries at the same level e.g., states or provinces, DO NOT use OSMnx because it is slow. You can use Overpass API. Example code: `area['ISO3166-1'='US'][admin_level=2]->.us;(relation(area.us)['admin_level'='4'];);out geom;`. Overpass API is more quick and simple; you only need to carefully set up the administrative level.",                
+                "If you need to use a boundary to filter features in GeoPandas, this is the code: `gpd.sjoin(gdf, boundary, how='inner', op='within')`.",
+                "If you need to download multiple administrative boundaries at the same level, e.g., states or provinces, DO NOT use OSMnx because it is slow. You can use Overpass API. Example code: `area['ISO3166-1'='US'][admin_level=2]->.us;(relation(area.us)['admin_level'='4'];);out geom;`. Overpass API is  quicker and simpler; you only need to carefully set up the administrative level.",                
                 "Only use OSMnx to obtain the place boundaries; do no use it to download networks or POIs as it is very slow! Instead, use Overpass Query (endpoint: https://overpass-api.de/api/interpreter).",
                 "If using Overpass API, you need to output the geometry, i.e., using `out geom;` in the query. The geometry can be accessed by `returned_json['elements']['geometry']`; the gemotry is a list of points as `{'lat': 30.5, 'lon': 114.2}`.",
-                "Use GeoPandas, rather than OSGEO package to create vectors.",
+                "Use GeoPandas, rather than OSGEO package, to create vectors.",
                 "If the file saving format is not given in the tasks, save the downloaded files into GeoPackage format.",
-                "You need to create Python code to download and save the data. Another program will execute your code directly."
-                "Put your reply into a Python code block, Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).",
+                "You need to create Python code to download and save the data. Another program will execute your code directly.",
+                "Put your reply into a Python code block, explanation or conversation can be Python comments at the beginning of the code block(enclosed by ```python and ```).",
                 "The download code is only in a function named 'download_data()'. The last line is to execute this function.",
                 "When downloading OSM data, no need to use 'building' tags if it is not asked for.",
-                "Need to keep most attributes of the downloaded data, such as place name, street name, road type and level.",
+                "You need to keep most attributes of the downloaded data, such as place name, street name, road type, and level.",
                 "Throw an error if the the program fails to download the data; no need to handle the exceptions.",
-                "If you need to convert the OpenStreetMap returned JSON to GeoJSON, you can add this line to the OverPass query: `item ::=::,::geom=geom(),_osm_type=type(), ::id=id();`",
-               f"This is a program for your reference, note that you can improve it: {codebase.OpenStreetMap_code_sample_2}",
+                "If you need to convert the OpenStreetMap returned JSON to GeoJSON, you can add this line to the OverPass query: `item ::=::,::geom=geom(),_osm_type=type(), ::id=id();`. Note the converted GeoJSON may only contains polygons, no polygons.",
+               f"This is a program for your reference; note that you can improve it: {codebase.OpenStreetMap_code_sample_2}",
                 
             ],
  
@@ -180,7 +180,7 @@ handbooks = {'OpenStreetMap':[
 
  
 #------------- download data from a perticular data source
-download_role = r'''A professional Python programmer in geographic information science (GIScience). You have worked on GIScience for more than 20 years and know every detail and pitfall when collecting data and coding. You know which websites you can get suitable spatial data and know the methods or tricks to download data, such as OpenStreetMap, Census Bureau, or various APIs. You are also experienced in processing the downloaded data, including saving them in suitable formats, map projections, and creating detailed and useful meta-data. When downloading geo-spatial data, the technical handbook for a perticular data source is provided, you can follow it, and write Python code carefully to download the data. 
+download_role = r'''A professional Python programmer in geographic information science (GIScience). You have worked on GIScience for more than 20 years and know every detail and pitfall when collecting data and coding. You know which websites you can get suitable spatial data and know the methods or tricks to download data, such as OpenStreetMap, Census Bureau, or various APIs. You are also experienced in processing the downloaded data, including saving them in suitable formats, map projections, and creating detailed and useful meta-data. When downloading geo-spatial data, the technical handbook for a particular data source is provided; you can follow it, and write Python code carefully to download the data. 
 '''
 
 
