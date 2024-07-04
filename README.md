@@ -14,9 +14,10 @@ Note:  We are still developing LLM-Find, and the ideas presented in the paper ma
 
 # Installation
 
-Clone or download the repository, rename `your_config.ini` as `config.ini`. Then, put your OpenAI API key in the `config.ini` file. Please use GPT-4o, the lower versions may not have enough  ability to generate correct code.
+- Clone or download the repository, rename `your_config.ini` as `config.ini`. Then, put your OpenAI API key in the `config.ini` file. Please use GPT-4o, the lower versions may not have enough  ability to generate correct code.
+- Install the Python packages in the top cell.
 
-If you have difficulties installing `GeoPandas` in Windows, refer to this [post](https://geoffboeing.com/2014/09/using-geopandas-windows/). 
+- If you have difficulties installing `GeoPandas` in Windows, refer to this [post](https://geoffboeing.com/2014/09/using-geopandas-windows/). 
 
 
 # How to use
