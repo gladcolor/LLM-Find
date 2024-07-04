@@ -24,10 +24,10 @@ select_task_prefix = r'select a suitable data source from the given list to down
 data_sources = """
 1. OpenStreetMap. You can download the administrative boundaries, street networks, points of interest (POIs) from OpenStreetMap.
 2. US Census Bureau boundary. It provides the US administrative boundaries (nation, state, county, tract, and block group level, as well as metropolitan statistic areas.
-3. US Census Bureau demography. It provides the demographic and socio-economic data, such as population, gender, income, education and race.
+3. US Census Bureau demography. It provides the demographic and socio-economic data, such as population, gender, income, education, and race.
 4. US COVID-19 data by New York Times. Cumulative counts of COVID-19 cases and deaths in the United States, at the state and county level, over time from 2020-01-21 to 2023-03-23. 
 5. OpenWeather data. It provides historical, current, and forecast weather data. The historical data can be back to 2023-08. API limited: [Hourly forecast: 4 days, Daily forecast: 16 days, 3 hour forecast: 5 days]
-6. ESRI World Imagery (for Export). It is a web map service, providing satellite image tiles. You can download tiles and mosaic them into a large image. 
+6. ESRI World Imagery (for export). It is a web map service, providing satellite image tiles. You can download tiles and mosaic them into a large image. 
 """
 
 selection_reply_example = """{'Explanation': "According to the use requests of US state administrative boundary from OpenStreetMap, I should download data from OpenStreetMap.", "Selected data source": 'OpenStreetMap'}
@@ -36,7 +36,7 @@ selection_reply_example = """{'Explanation': "According to the use requests of U
 select_requirements = [
     "Return the exact name of the data source as the given names.",
     "If a data source is given in the task, e.g., OpenStreetMap or Census Bureau, you need to select that given data source.",
-    "If you need to download the administrative boundary of a place and without mentioning the data sources, you can get data from OpenStreetMap."
+    "If you need to download the administrative boundary of a place without mentioning the data sources, you can get data from OpenStreetMap."
     "If you need to download the US Census tract and block group boundaries, download them from Census Bureau."
     "Follow the given JSON format.",
     "If you cannot find a suitable data source in the given sources, return a data source you think is most appropriate.",
