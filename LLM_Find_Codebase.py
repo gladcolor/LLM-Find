@@ -9,12 +9,22 @@ import os
 
 def download_data():
     # Define the target area for which to download the data
-    places = ['Japan']
+    place = 'Japan'
 
     # Get the boundary of Japan
-    boundary = ox.geocode_to_gdf(places)
-    minx, miny, maxx, maxy = boundary.total_bounds
+    # get the first return's bounding box
+    url = f"https://nominatim.openstreetmap.org/search?q={place}&format=geojson"
+    response = requests.get(url, headers={"User-Agent":"LLM-Find/gladcolor@gmail.com"})
+    minx, miny, maxx, maxy = response.json()['features'][0]['bbox']
 
+    # extend the boundary for a point or to small:
+     if abs(maxx - minx) < 0.000001:  # note unit is degree
+         ext = 0.00005
+         maxx = maxx + ext
+         minx = minx - ext
+         maxy = maxy + ext
+         miny = miny - ext 
+         
     # Set the zoom level
     z = 6
     n = 2 ** z
@@ -54,7 +64,7 @@ def download_data():
     mosaic_path = "E:/OneDrive_PSU/OneDrive - The Pennsylvania State University/Research_doc/LLM-Find/Downloaded_Data/Japan_image.tif"
     mosaic.save(mosaic_path, "TIFF", compression="jpeg")
 
-    # Save a .jpw file to record the image location
+    # Save a world file to record the image location
     x_res = (maxx - minx) / (cols * tile_width)
     y_res = (maxy - miny) / (rows * tile_height)
     tfw_content = f"{x_res}\n0.0\n0.0\n{-y_res}\n{minx}\n{maxy}\n"
@@ -68,6 +78,16 @@ def download_data():
 
 download_data()
 '''
+
+# not used     
+""" 
+    # boundary = ox.geocode_to_gdf(place)
+# minx, miny, maxx, maxy = boundary.total_bounds
+If the requested place can be a point, such as Christ the Redeemer statue, you can use the following code to get the location:
+#url = f"https://nominatim.openstreetmap.org/search?q={place}&format=geojson"
+#response = requests.get(url, headers={"User-Agent":"LLM-Find/gladcolor@gmail.com"})
+#minx, miny, maxx, maxy = response.json()['features'][0]['bbox']
+"""
 
 US_Census_demography_code_sample = r'''
 import requests

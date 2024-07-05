@@ -167,8 +167,10 @@ handbooks = {'OpenStreetMap':[
                     "Try not to use `osgeo` Python package; it may have many errors.",
                     "Put your reply into a Python code block. Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).",
                     "The download code is only in a function named 'download_data()'. The last line is to execute this function; do not use `if __name__ == '__main__':`.",
-                    "You can use OSMnx Python package to download the boundary of the request place, then use boundary's bounding box to determine the extent of the imagery. Example code: `minx, miny, maxx, maxy = ox.geocode_to_gdf(place).total_bounds`.",
-                    "When using ox.geocode_to_gdf(place), if you get errors, try to change the 'place' name. E.g., 'Penn State University, State College, PA' may not exist in OpenStreetMap, but 'Penn State University' may exist.",
+                    # "You can use OSMnx Python package to download the boundary of the request place, then use boundary's bounding box to determine the extent of the imagery. Example code: `minx, miny, maxx, maxy = ox.geocode_to_gdf(place).total_bounds`. Note it returns the first polygon.",
+                    # "When using ox.geocode_to_gdf(place), if you get errors, try to change the 'place' name. E.g., 'Penn State University, State College, PA' may not exist in OpenStreetMap, but 'Penn State University' may exist.",
+                    "If the requested area is provided as a place name, search its bounding box from OpenStreetMap, do not guess the lat/lon yourself since we need accurate results.",
+                    "If you use `ox.geocode_to_gdf(place)` to get the place boundary, note that this function return the first POLYGON result from the OpenStreetMap Nominatim 'search' endpoint. Thus, you are searching a POI (a single point), you can use Nominatim (do not forget to set the application name before get the data. Try the Nominatim first.",
                     "The tile's row and col can be calculated by: `tile_col = int((lon + 180.0) / 360.0 * n); tile_row = int((1.0 - np.log(np.tan(np.radians(lat)) + 1 / np.cos(np.radians(lat))) / np.pi) / 2.0 * n)`.",
                     "Remember how to do name the tiles since you need to mosaic them later.",
                     "DO NOT handle any exceptions since we need to error information for debug.",                      
@@ -257,7 +259,7 @@ debug_requirement = [
                         # "Bugs may caused by data, such as map projection inconsistency, column data type mistakes (e.g., int, flota, str), spatial joining type (e.g., inner, outer), and NaN cells.",
                         # "When read FIPS or GEOID columns from CSV files, read those columns as str or int, never as float.",
                         "FIPS or GEOID columns may be str type with leading zeros (digits: state: 2, county: 5, tract: 11, block group: 12), or integer type without leading zeros. Thus, when joining using they, you can convert the integer colum to str type with leading zeros to ensure the success.",
-                        "If you use `ox.geocode_to_gdf(place_name)` to a place's boundary and get a type error of 'Nominatim could not geocode query place_name to a geometry of type (Multi)Polygon'; it is coused by a place name not in OpenStreetMap; you need to change the place name to address this error. E.g., using 'Penn State University' instead of 'Penn State University, State College, PA'.",
+                        "If you use `ox.geocode_to_gdf(place_name)` to a place's boundary and get a type error of 'Nominatim could not geocode query place_name to a geometry of type (Multi)Polygon'; it is caused by a place name not in OpenStreetMap; you need to change the place name to address this error. E.g., using 'Penn State University' instead of 'Penn State University, State College, PA'.",
                         ]
 
  
