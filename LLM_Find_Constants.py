@@ -256,8 +256,7 @@ debug_requirement = [
                         # "Bugs may caused by data, such as map projection inconsistency, column data type mistakes (e.g., int, flota, str), spatial joining type (e.g., inner, outer), and NaN cells.",
                         # "When read FIPS or GEOID columns from CSV files, read those columns as str or int, never as float.",
                         "FIPS or GEOID columns may be str type with leading zeros (digits: state: 2, county: 5, tract: 11, block group: 12), or integer type without leading zeros. Thus, when joining using they, you can convert the integer colum to str type with leading zeros to ensure the success.",
-                        # "If you need to make a map and the map size is not given, set the map size to 15*10 inches.",
-                        # 'Save the generated map as the file of "output_map.png"; the DPI is 100.',
+                        "If you use `ox.geocode_to_gdf(place_name)` to a place's boundary and get a type error of 'Nominatim could not geocode query place_name to a geometry of type (Multi)Polygon'; it is coused by a place name not in OpenStreetMap; you need to change the place name to address this error. E.g., using 'Penn State University' instead of 'Penn State University, State College, PA'.",
                         ]
 
  
