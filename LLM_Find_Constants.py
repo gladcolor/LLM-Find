@@ -166,10 +166,11 @@ handbooks = {'OpenStreetMap':[
                     "You will receive a place name or a bounding box of the target area.",
                     "Put your reply into a Python code block. Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).",
                     "The download code is only in a function named 'download_data()'. The last line is to execute this function; do not use `if __name__ == '__main__':`.",
-                    "You can use OSMnx Python package to download the boundary of the request place, then use boundary's bounding box to determine the extent of the imagery. Example code: `minx, miny, maxx, maxy = ox.geocode_to_gdf(places).total_bounds`.",
+                    "You can use OSMnx Python package to download the boundary of the request place, then use boundary's bounding box to determine the extent of the imagery. Example code: `minx, miny, maxx, maxy = ox.geocode_to_gdf(place).total_bounds`.",
+                    "When using ox.geocode_to_gdf(place), if you get errors, try to change the 'place' name. E.g., 'Penn State University, State College, PA' may not exist in OpenStreetMap, but 'Penn State University' may exist.",
                     "The tile's row and col can be calculated by: `tile_col = int((lon + 180.0) / 360.0 * n); tile_row = int((1.0 - np.log(np.tan(np.radians(lat)) + 1 / np.cos(np.radians(lat))) / np.pi) / 2.0 * n)`.",
                     "Remember how to do name the tiles since you need to mosaic them later.",
-                    "DO NOT handle any exceptions since we need to error information for debug.",  
+                    "DO NOT handle any exceptions since we need to error information for debug.",                      
                     f"This is a program for your reference, note that you can improve it: {codebase.ESRI_world_imagery_code_sample}",
                    
                 ],
