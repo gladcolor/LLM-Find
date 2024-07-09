@@ -25,6 +25,8 @@ Note:  We are still developing LLM-Find, and the ideas presented in the paper ma
 - Put your data request to the `task` variable.
 - Run all cells.
 - LLM-Find will use the backed LLM (GPT-4o now) to generate and debug the data fetching program. GPT-4o's debugging ability is still weak. The default maximum attempt count is set to 10; modify this value is needed. 
+- Tip 1: we suggest you re-run the program if LLM-Find cannot write the bug-free code. Per our observation, GPT sometimes will keep writing wrong code in a period about 10 minutes. Seems GPT will cache some previous answers so that it keeps return the same or similar wrong code.
+
 
 # Case studies
 Please play with the provided cases (~60), we also encourage you use your own cases. These case studies are designed to show the concepts of autonomous data fetching agents. Please use GPT-4o or above; the lower version of GPT will fail to generate the correct code and results. Note every time GPT-4o generates different outputs, your results may look different. Per our test, the generated program may not succeed at a chance about 10%; if so, please re-run all the cells again; no need to manually debug the code unless you like to do so. 
@@ -34,6 +36,7 @@ When fetching OpenStreetMap data and images, for those places do not use English
 
 # To Do
 - Needs a data assessment module.
+- Issue 1: ee observed that GPT cannot correct the contaminated information even adding instructions in the prompt. E.g., it has about 50% chance to ignore the instruction of "using `relation(osm_id)` rather than `area(osm_id)`". Thus, we have to replace the string using Python code.
 
 # Note:
 
