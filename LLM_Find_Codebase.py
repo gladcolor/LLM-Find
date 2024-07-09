@@ -252,10 +252,11 @@ download_data()
 '''
 
 
-OpenStreetMap_code_sample_2 = '''
+OpenStreetMap_code_sample_2 = r'''
 # Below is a program to download the province boundaries of Cuba.
 import geopandas as gpd
 import pandas as pd
+import osmnx as ox
 import requests
 import json
 from shapely.ops import linemerge, unary_union, polygonize
@@ -264,14 +265,24 @@ from shapely.ops import polygonize
 
 def download_data():
     # Define Overpass API query to download province boundaries of Cuba
-    overpass_url = "https://overpass-api.de/api/interpreter"
-    overpass_query = """
-    [out:json];
-    area["ISO3166-1"="CU"][admin_level=2]->.cu;
-    relation(area.cu)["admin_level"="4"];
-    out geom;
-    """
+    # This Overpass query is good for multiple polygons.
+    # `boundary=ox.place_to_gdf(place)` is to get the first polygon returned by the Nominatim.org API. 
+    osm_id = ox.geocode_to_gdf(place_name)['osm_id'][0] # get the osm_id then get the relation by osm_id.
     
+
+    # IMPORTANT: keep the pipeline to form the Overpass query; it has been manually verified!
+    # Note that area(osm_id) is not correct because it is not the native OpenStreetMap data structure.
+    overpass_url = "https://overpass-api.de/api/interpreter"
+    overpass_query = f"""
+    [out:json];
+    relation({osm_id});   // Note that it is 'relation()'! 
+    map_to_area->.rel;   // DO not forget this line!
+    relation(area.rel)["admin_level"="4"];
+    out geom;  // keep geom!
+    """
+
+    # if only request the boundary only, use `gdf = ox.geocode_to_gdf()` is the fastest way! You do not need to use Overpass and then parse the reply.
+  
     # Send request to Overpass API
     response = requests.get(overpass_url, params={'data': overpass_query})
     response.raise_for_status()  # Automatically raises an error for bad status codes

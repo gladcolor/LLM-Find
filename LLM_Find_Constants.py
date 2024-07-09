@@ -60,16 +60,21 @@ data_source_dict = {
 
 #------------- Handbook for OpenStreetMap
 handbooks = {'OpenStreetMap':[
-               "If the requested area is given in an English name, you need to use `['name:en'='XX']` to filter the place in Overpass queries; otherwise you will get empty results. The `name` tag in OpenStreetMap usually is in the location language.",
-                "If you need to download the administrative boundary of a place from OpenStreetMap, please use a Python package named 'OSMnx' by this code line: `ox.geocode_to_gdf(query, which_result=None, by_osmid=False, buffer_dist=None)`. This method is fast. ",
-                "If you need to download POIs, you may use the Overpass API, which is faster than OSMnx library. Code example is: `area['SO3166-2'='US-PA']->.searchArea;(nwr[amenity='hospital'](area.searchArea););out center;`",
-               "If you need to download polylines, you may use the Overpass API, which is faster than OSMnx library.",
+               # "If the requested area is given in an English name, you need to use `['name:en'='XX']` to filter the place in Overpass queries; otherwise you will get empty results. The `name` tag in OpenStreetMap usually is in the location language.",
+               
+                # "If you need to download POIs, you may use the Overpass API, which is faster than OSMnx library. Code example is: `area['SO3166-2'='US-PA']->.searchArea;(nwr[amenity='hospital'](area.searchArea););out center;`",
+               "You may use the Overpass API, which is faster than OSMnx library.", 
+               "If you need to download the administrative boundary of only one place from OpenStreetMap, please use a Python package named 'OSMnx' by this code line: `gdf = ox.geocode_to_gdf(place_name)`. This method is fast and recommended. You do not need to use Overpass and then parse the reply.",
+                "The overall workflow for fetching data within a place's boundary: 1) get the requested place's osm_id by `osm_id = ox.geocode_to_gdf(place_name)['osm_id'][0]`; 2) form the Overpass query. E.g., `f'relation({osm_id}); map_to_area->.rel; way(area.rel)[railway];'` 3) fetch and save the data.",
+               "The reason of using `ox.geocode_to_gdf()' to get the osm_id is that this function uses Nominatim API to convert the fuzzy place name into a polygon that most match the given place name, rather than exact matching, which may not return the requested polygon.",
+               # "If you need to download polylines, you may use the Overpass API, which is faster than OSMnx library.",
                # 
                # "You can use the bounding box in the Overpass query to filter out the data extent (`west, south, east, north = ox.geocode_to_gdf(place_name).unary_union.bounds`), and using the tags to filter out the data type. DO NOT download all the data first then filter, which it is not feasible. After getting the data in a bounding box, you can use GeoPandas and the boundary to filter out the data in the target area: `gpd.sjoin(gdf, boundary, how='inner', op='within')`.",
                 "If you need to use a boundary to filter features in GeoPandas, this is the code: `gpd.sjoin(gdf, boundary, how='inner', op='within')`.",
                 "If you need to download multiple administrative boundaries at the same level, e.g., states or provinces, DO NOT use OSMnx because it is slow. You can use Overpass API. Example code: `area['ISO3166-1'='US'][admin_level=2]->.us;(relation(area.us)['admin_level'='4'];);out geom;`. Overpass API is  quicker and simpler; you only need to carefully set up the administrative level.",                
                 "Only use OSMnx to obtain the place boundaries; do no use it to download networks or POIs as it is very slow! Instead, use Overpass Query (endpoint: https://overpass-api.de/api/interpreter).",
-                "If using Overpass API, you need to output the geometry, i.e., using `out geom;` in the query. The geometry can be accessed by `returned_json['elements']['geometry']`; the gemotry is a list of points as `{'lat': 30.5, 'lon': 114.2}`.",
+                "If using Overpass API, you need to output the geometry, i.e., using `out geom;` in the query. The geometry can be accessed by `returned_json['elements']['geometry']`; the geomtry is a list of points as `{'lat': 30.5, 'lon': 114.2}`.",
+                "If you need to determine the requested area of some small cities or places, try not to use the 'admin_level' tag, because you may not know its admin_level correctly. E.g., `area[name=small_place]` is better than `relation[name=small_place][admin_level=6]`, level=6 may be wrong. DO NOT assume the admin_level which lower than 4.",
                 "Use GeoPandas, rather than `osgeo` Python package, to create vectors.",
                 "If the file saving format is not given in the tasks, save the downloaded files into GeoPackage format.",
                 "You need to create Python code to download and save the data. Another program will execute your code directly.",
@@ -77,10 +82,12 @@ handbooks = {'OpenStreetMap':[
                 "The download code is only in a function named 'download_data()'. The last line is to execute this function.",
                 "When downloading OSM data, no need to use 'building' tags if it is not asked for.",
                 "You need to keep most attributes of the downloaded data, such as place name, street name, road type, and level.",
-                "Throw an error if the the program fails to download the data; no need to handle the exceptions.",
+                "Throw an error if the program fails to download the data; no need to handle the exceptions.",
                 "If you need to convert the OpenStreetMap returned JSON to GeoJSON, you can add this line to the OverPass query: `item ::=::,::geom=geom(),_osm_type=type(), ::id=id();`. Note the converted GeoJSON may only contains polygons, no polygons.",
-               f"This is a program for your reference; note that you can improve it: {codebase.OpenStreetMap_code_sample_2}",
-                
+               f"This is a program for your reference; you can improve the data parsing but please keep the pipeline to form the Overpass queries (i.e., `f'relation(osm_id); map_to_area->.rel;`, do not use ``area(osm_id)), which has been manually verified: {codebase.OpenStreetMap_code_sample_2}",
+            # Nominatim API does not work well. E.g., 'Pennsylvania State, USA' will not return correct polygon.
+    # !!!!!  `relation(osm_id); map_to_area->.rel;` is better than `relation(osm_id); map_to_area->.rel;` since GPT-4 will always use 'area(osm_id); map_to_area->.searchArea;'. Seems the word 'area' will heavily affect GPT.
+    ## difficult to address the LLM contaminated information. 
             ],
  
              #------------- Handbook for US Census Bureau boundary
@@ -229,7 +236,7 @@ debug_role =  r'''A professional geo-information scientist and programmer who is
 debug_task_prefix = r"You need to correct a program's code based on the given error information and then return the complete corrected code."
 
 debug_requirement = [
-                        'Think step by step. Elaborate your reasons for revision before returning the code.',
+                        'Think step by step. Elaborate your reasons for revision before returning the code. E.g., Explaination for the revision: xxxx \n The reivsed code is: ```pyhon xxxx  ```.',
                         'Correct the code. Revise the buggy parts, but need to keep program structure, i.e., the function name, its arguments, and returns.',                        
                         'You must return the entire corrected program in only one Python code block(enclosed by ```python and ```); DO NOT return the revised part only.',
                         'If using GeoPandas to load a zipped ESRI shapefile from a URL, the correct method is "gpd.read_file(URL)". DO NOT download and unzip the file.',
@@ -240,7 +247,7 @@ debug_requirement = [
                         "Map projection conversion is only conducted for spatial data layers such as GeoDataFrame. DataFrame loaded from a CSV file does not have map projection information.",
                         "If join DataFrame and GeoDataFrame, using common columns, DO NOT convert DataFrame to GeoDataFrame.",
                         "Remember the variable, column, and file names used in ancestor functions when using them, such as joining tables or calculating.",
-                        "You can use OSMnx Python package to download a city, neighborhood, borough, county, state, or country. The code is: `gdf = ox.geocode_to_gdf(place)`. The Overpass API `area['name'='target_placename']` might return emplty results.",
+                        "You can use OSMnx Python package to download a city, neighborhood, borough, county, state, or country. The code is: `gdf = ox.geocode_to_gdf(place)`. The Overpass API `area['name'='target_placename']` might return empty results.",
                         # "You usually need to obtain the boundaries first then use it to filter out the target data.",
                         # "When joining tables, convert the involved columns to string type without leading zeros. ",
                         # "If using colorbar for GeoPandas or Matplotlib visualization, set the colorbar's height or length as the same as the plot for better layout.",
@@ -250,7 +257,7 @@ debug_requirement = [
                         # "Show a progressbar (e.g., tqdm in Python) if loop more than 200 times, also add exception handling for loops to make sure the loop can run.",
                         # "When crawl the webpage context to ChatGPT, using Beautifulsoup to crawl the text only, not all the HTML file.",
                         "If using GeoPandas for spatial analysis, when doing overlay analysis, carefully think about use Geopandas.GeoSeries.intersects() or geopandas.sjoin(). ",
-                        "Geopandas.GeoSeries.intersects(other, align=True) returns a Series of dtype('bool') with value True for each aligned geometry that intersects other. other:GeoSeries or geometric object. ",
+                        "Geopandas.GeoSeries.intersects(other, align=True) returns a Series of dtype('bool') with value True for each aligned geometry that intersects others. other:GeoSeries or geometric object. ",
                         "If using GeoPandas for spatial joining, the arguements are: geopandas.sjoin(left_df, right_df, how='inner', predicate='intersects', lsuffix='left', rsuffix='right', **kwargs), how: the type of join, default ‘inner’, means use intersection of keys from both dfs while retain only left_df geometry column. If 'how' is 'left': use keys from left_df; retain only left_df geometry column, and similarly when 'how' is 'right'. ",
                         "Note geopandas.sjoin() returns all joined pairs, i.e., the return could be one-to-many. E.g., the intersection result of a polygon with two points inside it contains two rows; in each row, the polygon attribute is the same. If you need of extract the polygons intersecting with the points, please remember to remove the duplicated rows in the results.",
                         # "GEOID in US Census data and FIPS (or 'fips') in Census boundaries are integer with leading zeros. If use pandas.read_csv() to GEOID or FIPS (or 'fips') columns from read CSV files, set the dtype as 'str'.",
@@ -260,6 +267,9 @@ debug_requirement = [
                         # "When read FIPS or GEOID columns from CSV files, read those columns as str or int, never as float.",
                         "FIPS or GEOID columns may be str type with leading zeros (digits: state: 2, county: 5, tract: 11, block group: 12), or integer type without leading zeros. Thus, when joining using they, you can convert the integer colum to str type with leading zeros to ensure the success.",
                         "If you use `ox.geocode_to_gdf(place_name)` to a place's boundary and get a type error of 'Nominatim could not geocode query place_name to a geometry of type (Multi)Polygon'; it is caused by a place name not in OpenStreetMap; you need to change the place name to address this error. E.g., using 'Penn State University' instead of 'Penn State University, State College, PA'.",
+                        "Carefully check whether the Overpass query is using `relation({osm_id}); map_to_area->.rel;` to get the filtering area. `area(osm_id)->.rel` is wrong",
+                        "NEVER using `area(osm_id)->.rel` to filter data in Overpass queries.",
+                        "You must replace 'area({osm_id})->.rel;' by 'relation({osm_id}); map_to_area->.rel;'. Only the latter is correct!",
                         ]
 
  
