@@ -64,7 +64,7 @@ def download_data():
     mosaic_path = "E:/OneDrive_PSU/OneDrive - The Pennsylvania State University/Research_doc/LLM-Find/Downloaded_Data/Japan_image.tif"
     mosaic.save(mosaic_path, "TIFF", compression="jpeg")
 
-    # Save a world file to record the image location
+    # Save a world file to record the image location. Note that this is just a rough location. Further geo-reference is need to correctly position the downloaded image of Web Mercator Auxiliary Sphere projection.
     x_res = (maxx - minx) / (cols * tile_width)
     y_res = (maxy - miny) / (rows * tile_height)
     tfw_content = f"{x_res}\n0.0\n0.0\n{-y_res}\n{minx}\n{maxy}\n"
@@ -343,5 +343,40 @@ def download_data():
     output_file = r"E:\Cuba_Province_boundary.gpkg"
     gdf.to_file(output_file, layer='province_boundaries', driver='GPKG')
 
+download_data()
+'''
+
+OpenTopography_code_sample = r'''
+import requests
+import osmnx as ox
+
+def download_data():
+    place_name = "Great Smoky Mountains National Park, USA"
+    
+    # Get the bounding box for the place name
+    gdf = ox.geocode_to_gdf(place_name)
+    west, south, east, north = gdf.unary_union.bounds
+    
+    # Set the OpenTopography API parameters
+    demtype = "SRTMGL3"  # This is 90m resolution
+    output_format = "GTiff"
+    api_url = (
+        f"https://portal.opentopography.org/API/globaldem?"
+        f"demtype={demtype}&south={south}&north={north}&west={west}&east={east}&outputFormat={output_format}&API_Key=XXXX"
+    )
+    
+    # Send the request to download the data
+    response = requests.get(api_url)
+    
+    # Raise an exception if the request was unsuccessful
+    response.raise_for_status()
+    
+    # Save the downloaded data to the specified path
+    output_path = r"E:\Great Smoky Mountains National Park.tif"
+    
+    with open(output_path, 'wb') as file:
+        file.write(response.content)
+
+# Execute the function to download the data
 download_data()
 '''

@@ -7,7 +7,7 @@ config.read('config.ini')
 OpenAI_key = config.get('API_Key', 'OpenAI_key')
 OpenWeather_key = config.get('API_Key', 'OpenWeather_key')
 US_Census_key = config.get('API_Key', 'US_Census_key')
-
+OpenTopography = config.get('API_Key', 'OpenTopography')
 
 # print("OpenAI_key:", OpenAI_key)
 
@@ -28,6 +28,7 @@ data_sources = """
 4. US COVID-19 data by New York Times. Cumulative counts of COVID-19 cases and deaths in the United States, at the state and county level, over time from 2020-01-21 to 2023-03-23. 
 5. OpenWeather data. It provides historical, current, and forecast weather data. The historical data can be back to 2023-08. API limited: [Hourly forecast: 4 days, Daily forecast: 16 days, 3 hour forecast: 5 days]
 6. ESRI World Imagery (for Export). It is a web map service, providing satellite image tiles. You can download tiles and mosaic them into a large image. 
+7. OpenTopography. You can download global digital elevation model (DEM) data using API; the resolution ranges from 15m to 1000m, such as SRTM GL3 (global 90m), and GL1 (global 30m). The DEM source list from this API contains: SRTMGL3, SRTMGL1, SRTMGL1_E, AW3D30, AW3D30, SRTM15Plus, NASADEM, COP30, COP30, EU_DTM, GEDI_L3, GEBCOIceTopo, GEBCOSubIceTopo.
 """
 
 selection_reply_example = """{'Explanation': "According to the use requests of US state administrative boundary from OpenStreetMap, I should download data from OpenStreetMap.", "Selected data source": 'OpenStreetMap'}
@@ -52,6 +53,7 @@ data_source_dict = {
     "US COVID-19 data by New York Times": {"ID": "COVID_NYT"},
     "OpenWeather data": {"ID": "OpenWeather"},
     "ESRI World Imagery (for Export)": {"ID": "ESRI_world_imagery"},
+    "OpenTopography": {"ID": "OpenTopography"},
     "Unknown": {"ID": "Unknown"},
 }
 
@@ -168,7 +170,7 @@ handbooks = {'OpenStreetMap':[
 
                                                     #------------- Handbook for ESRI World imagery (for export) -----
                 'ESRI_world_imagery':[
-                    "The endpoint is: https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{row}/{col}. 'row' is the row number from the top, 'col' is the column number from the left. The map projection is WGS 1984 Web Mercator (auxiliary sphere), EPSG: 3857.",
+                    r"The endpoint is: https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{row}/{col}. 'row' is the row number from the top, 'col' is the column number from the left. The map projection is WGS 1984 Web Mercator (auxiliary sphere), EPSG: 3857.",
                     "You need to download the image tiles into the given folder (name them as 'z-row-col.jpg'), and then mosaic them into a single TIFF image with jpeg compression; also save a .jpw file for tiles to record the image locations for further merge. The mosaic result needs a .tfw file.",
                     "You will receive a place name or a bounding box of the target area.",
                     "Try not to use `osgeo` Python package; it may have many errors.",
@@ -181,13 +183,28 @@ handbooks = {'OpenStreetMap':[
                     "The tile's row and col can be calculated by: `tile_col = int((lon + 180.0) / 360.0 * n); tile_row = int((1.0 - np.log(np.tan(np.radians(lat)) + 1 / np.cos(np.radians(lat))) / np.pi) / 2.0 * n)`.",
                     "Remember how to do name the tiles since you need to mosaic them later.",
                     "DO NOT handle any exceptions since we need to error information for debug.",                      
-                    f"This is a program for your reference, note that you can improve it: {codebase.ESRI_world_imagery_code_sample}",
-                   
+                    f"This is a program for your reference, note that you can improve it: {codebase.ESRI_world_imagery_code_sample}",                   
+                ],
+
+                                                    #------------- Handbook for OpenTopology -----
+                'OpenTopography':[
+                   f"The OpenTopography API key is: {OpenTopography}",
+                    r"The endpoint is: https://portal.opentopography.org/API/globaldem?demtype=SRTMGL3&south=50&north=50.1&west=14.35&east=14.6&outputFormat=GTiff&API_Key=XXX.",
+                    "The REST API parameter description: demtype: [SRTMGL3 (SRTM GL3 90m)， SRTMGL1 (SRTM GL1 30m)， SRTMGL1_E (SRTM GL1 Ellipsoidal 30m)， AW3D30 (ALOS World 3D 30m)， AW3D30_E (ALOS World 3D Ellipsoidal, 30m)， SRTM15Plus (Global Bathymetry SRTM15+ V2.1 500m)， NASADEM (NASADEM Global DEM)， COP30 (Copernicus Global DSM 30m)， COP90 (Copernicus Global DSM 90m)， EU_DTM (DTM 30m)， GEDI_L3 (DTM 1000m)， GEBCOIceTopo (Global Bathymetry 500m)， GEBCOSubIceTopo (Global Bathymetry 500m)]; south, north, west, and east: WGS 84 bounding box; outputFormat: 'GTiff' for GeoTiff, 'AAIGrid' for Arc ASCII Grid, 'HFA' for Erdas Imagine (.IMG).",
+                    "Shuttle Radar Topography Mission GL3 (Global 90m), GL1 (Global 30m), GL1 Ellipsoidal, ALOS World 3D (Global 30m), ALOS World 3D Ellipsoidal, Global Bathymetry and Topography at 15 Arc Sec: SRTM15+ V2.1, NASADEM (NASADEM Global DEM), COP30 (Copernicus Global DSM 30m), COP90 (Copernicus Global DSM 90m), Continental Europe Digital Terrain Model 30m, GEDI L3 (DTM 1000 meter), GEBCOIceTopo (Global Bathymetry 500m) and GEBCOSubIceTopo (Global Bathymetry 500m) data.",
+                    "You will receive a place name or a bounding box of the target area.",
+                    "Try not to use `osgeo` Python package; it may have many errors.",
+                    "Put your reply into a Python code block. Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).",
+                    "The download code is only in a function named 'download_data()'. The last line is to execute this function; do not use `if __name__ == '__main__':`.",
+                    # "The free OT API key is rate limited to 500 calls per 24 hours.",
+                    "If the requested area is provided as a place name, search its bounding box from OpenStreetMap, do not guess the lat/lon yourself since we need accurate results.",
+                    "If you use `ox.geocode_to_gdf(place)` to get the place boundary, note that this function return the first POLYGON result from the OpenStreetMap Nominatim 'search' endpoint. Thus, you are searching a POI (a single point), you can use Nominatim (do not forget to set the application name before get the data. Try the Nominatim first.",                   
+                    "To the get bounding box, you can use `gdf = ox.geocode_to_gdf(place_name); west, south, east, north = gdf.unary_union.bounds`.",
+                    "DO NOT handle any exceptions since we need to error information for debug.",   
+                    f"This is a program for your reference, note that you can improve it: {codebase.OpenTopography_code_sample}", 
                 ],
              
             }
-
-
 
  
 #------------- download data from a perticular data source
