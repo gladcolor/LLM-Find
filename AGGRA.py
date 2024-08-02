@@ -221,23 +221,6 @@ class AGGRA:
             self.first_start = False
             self.dlg = AGGRADockWidget()
 
-
-        # # if not self.pluginIsActive:
-        # #     self.pluginIsActive = True
-        #
-        #     #print "** STARTING AGGRA"
-        #
-        #     # dockwidget may not exist if:
-        #     #    first run of plugin
-        #     #    removed on close (see self.onClosePlugin method)
-        # if self.dockwidget == None:
-        #     # Create the dockwidget (after translation) and keep reference
-        #     self.dockwidget = AGGRADockWidget()
-        #
-        # # connect to provide cleanup on closing of dockwidget
-        # self.dockwidget.closingPlugin.connect(self.onClosePlugin)
-
-        # show the dockwidget
         # TODO: fix to allow choice of dock location
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dlg)
         # self.dockwidget.show()
