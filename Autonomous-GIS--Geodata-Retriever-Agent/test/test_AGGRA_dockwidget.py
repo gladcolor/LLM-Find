@@ -14,8 +14,6 @@ __copyright__ = 'Copyright 2024, Geoinformation and Big Data Research Laboratory
 
 import unittest
 
-from qgis.PyQt.QtGui import QDockWidget
-
 from AGGRA_dockwidget import AGGRADockWidget
 
 from utilities import get_qgis_app
