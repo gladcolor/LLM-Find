@@ -6,6 +6,9 @@ import numpy as np
 from PIL import Image
 from osgeo import gdal
 import os
+from pyproj import Transformer
+import rasterio
+
 
 def download_data():
     # Define the target area for which to download the data
@@ -24,9 +27,9 @@ def download_data():
          minx = minx - ext
          maxy = maxy + ext
          miny = miny - ext 
-         
+        
     # Set the zoom level
-    z = 6
+    z = 4
     n = 2 ** z
 
     # Calculate the tiling scheme boundaries
@@ -61,16 +64,51 @@ def download_data():
             mosaic.paste(tile, (col * tile_width, row * tile_height))
 
     # Save the mosaic image as a TIFF file
+    image_array = np.array(mosaic)
+
+        # Calculate the actual geographic bounds of the mosaic
+    def tile_to_lonlat(col, row, zoom):
+        n = 2.0 ** zoom
+        lon_deg = col / n * 360.0 - 180.0
+        lat_rad = np.arctan(np.sinh(np.pi * (1 - 2 * row / n)))
+        lat_deg = np.degrees(lat_rad)
+        return lon_deg, lat_deg
+
+    actual_min_lon, actual_max_lat = tile_to_lonlat(tile_min_col, tile_min_row, z)
+    actual_max_lon, actual_min_lat = tile_to_lonlat(tile_max_col + 1, tile_max_row + 1, z)
+
+       # Convert geographic bounds to Web Mercator
+    transformer = Transformer.from_crs("epsg:4326", "epsg:3857", always_xy=True)
+    actual_min_x, actual_min_y = transformer.transform(actual_min_lon, actual_min_lat)
+    actual_max_x, actual_max_y = transformer.transform(actual_max_lon, actual_max_lat)
+
+    # Set the bounding box for Web Mercator
+    actual_bounding_box_mercator = actual_min_x, actual_min_y, actual_max_x, actual_max_y
+    print("Actual Bounding Box in Web Mercator:", actual_bounding_box_mercator)
+    
+    transform = from_bounds(*actual_bounding_box_mercator, width=mosaic.width, height=mosaic.height)
+
     mosaic_path = "E:/OneDrive_PSU/OneDrive - The Pennsylvania State University/Research_doc/LLM-Find/Downloaded_Data/Japan_image.tif"
-    mosaic.save(mosaic_path, "TIFF", compression="jpeg")
+    crs = {'init': 'epsg:3857'}
 
-    # Save a world file to record the image location. Note that this is just a rough location. Further geo-reference is need to correctly position the downloaded image of Web Mercator Auxiliary Sphere projection.
-    x_res = (maxx - minx) / (cols * tile_width)
-    y_res = (maxy - miny) / (rows * tile_height)
-    tfw_content = f"{x_res}\n0.0\n0.0\n{-y_res}\n{minx}\n{maxy}\n"
-    with open(mosaic_path.replace(".tif", ".tfw"), "w") as tfw_file:
-        tfw_file.write(tfw_content)
-
+    # Save the image as a GeoTIFF using rasterio
+    print(mosaic_path)
+    with rasterio.open(
+        mosaic_path,
+        'w',
+        driver='GTiff',
+        height=image_array.shape[0],
+        width=image_array.shape[1],
+        count=image_array.shape[2],  # Number of channels (e.g., 3 for RGB)
+        dtype=image_array.dtype,
+        crs=crs,
+        transform=transform
+    ) as dst:
+        # Write each channel separately
+        for i in range(1, image_array.shape[2] + 1):
+            print(i)
+            dst.write(image_array[:, :, i - 1], i)
+ 
     # Clean up the individual tile images (optional)
     for file in os.listdir(save_dir):
         os.remove(os.path.join(save_dir, file))
