@@ -1,0 +1,34 @@
+cd D:\OneDrive_PSU\OneDrive - The Pennsylvania State University\Research_doc\LLM-Cat
+D:
+conda activate llm_geo
+jupyter lab
+
+
+cd E:\OneDrive_PSU\OneDrive - The Pennsylvania State University\Research_doc\LLM-Find\Python_code
+E:
+conda activate ox
+jupyter lab
+
+conda activate ox
+
+conda install osmnx -c conda-forge --strict-channel-priority 
+
+
+conda config --prepend channels conda-forge
+conda create -n llm_geo --strict-channel-priority geopandas jupyterlab
+
+
+
+git clone https://github.com/gladcolor/LLM-Cat.git
+
+
+
+git clone --bare https://github.com/gladcolor/LLM-Geo.git
+
+
+git push --mirror https://github.com/gladcolor/LLM-Cat.git
+
+
+issue:
+1. add a scale bar is very difficult.
+2. map projection is hard to understand.

@@ -18,7 +18,7 @@ def download_data():
     minx, miny, maxx, maxy = response.json()['features'][0]['bbox']
 
     # extend the boundary for a point or to small:
-     if abs(maxx - minx) < 0.000001:  # note unit is degree
+    if abs(maxx - minx) < 0.000001:  # note unit is degree
          ext = 0.00005
          maxx = maxx + ext
          minx = minx - ext

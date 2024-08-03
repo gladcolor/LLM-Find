@@ -171,7 +171,8 @@ handbooks = {'OpenStreetMap':[
                                                     #------------- Handbook for ESRI World imagery (for export) -----
                 'ESRI_world_imagery':[
                     r"The endpoint is: https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{row}/{col}. 'row' is the row number from the top, 'col' is the column number from the left. The map projection is WGS 1984 Web Mercator (auxiliary sphere), EPSG: 3857.",
-                    "You need to download the image tiles into the given folder (name them as 'z-row-col.jpg'), and then mosaic them into a single TIFF image with jpeg compression; also save a .jpw file for tiles to record the image locations for further merge. The mosaic result needs a .tfw file.",
+                    # "You need to download the image tiles into the given folder (name them as 'z-row-col.jpg'), and then mosaic them into a single TIFF image with jpeg compression; also save a .jpw file for tiles to record the image locations for further merge. The mosaic result needs a .tfw file.",
+                    "Save the downloaded image to a geo-tiff, and write down the bounding box to the geotiff tags.",
                     "You will receive a place name or a bounding box of the target area.",
                     "Try not to use `osgeo` Python package; it may have many errors.",
                     "Put your reply into a Python code block. Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).",
@@ -180,7 +181,7 @@ handbooks = {'OpenStreetMap':[
                     # "When using ox.geocode_to_gdf(place), if you get errors, try to change the 'place' name. E.g., 'Penn State University, State College, PA' may not exist in OpenStreetMap, but 'Penn State University' may exist.",
                     "If the requested area is provided as a place name, search its bounding box from OpenStreetMap, do not guess the lat/lon yourself since we need accurate results.",
                     "If you use `ox.geocode_to_gdf(place)` to get the place boundary, note that this function return the first POLYGON result from the OpenStreetMap Nominatim 'search' endpoint. Thus, you are searching a POI (a single point), you can use Nominatim (do not forget to set the application name before get the data. Try the Nominatim first.",
-                    "The tile's row and col can be calculated by: `tile_col = int((lon + 180.0) / 360.0 * n); tile_row = int((1.0 - np.log(np.tan(np.radians(lat)) + 1 / np.cos(np.radians(lat))) / np.pi) / 2.0 * n)`.",
+                    # "The tile's row and col can be calculated by: `tile_col = int((lon + 180.0) / 360.0 * n); tile_row = int((1.0 - np.log(np.tan(np.radians(lat)) + 1 / np.cos(np.radians(lat))) / np.pi) / 2.0 * n)`.",
                     "Remember how to do name the tiles since you need to mosaic them later.",
                     "DO NOT handle any exceptions since we need to error information for debug.",                      
                     f"This is a program for your reference, note that you can improve it: {codebase.ESRI_world_imagery_code_sample}",                   
