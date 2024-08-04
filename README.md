@@ -42,7 +42,7 @@ LLM-Find Agent workflow
 
 
 # Case studies
-Please play with the provided cases (~70), we also encourage you use your own cases. These case studies are designed to show the concepts of autonomous data fetching agents. Please use GPT-4o or above; the lower version of GPT will fail to generate the correct code and results. Note every time GPT-4o generates different outputs, your results may look different. Per our test, the generated program may not succeed at a chance about 10%; if so, please re-run all the cells again; no need to manually debug the code unless you like to do so. 
+Please play with the provided cases (~70), we also encourage you use your own cases. These case studies are designed to show the concepts of autonomous data fetching agents. Please use GPT-4o or above; the lower version of GPT will fail to generate the correct code and results. Note every time GPT-4o generates different outputs, your results may look different. Per our test, the generated program may fail at a chance about 10%; if so, please re-run all the cells again; no need to manually debug the code unless you like to do so. 
 
 When fetching OpenStreetMap data and images, for those places do not use English, we encourage you to input the names written in local language. Such two data sources are more friendly correctly with the native language names than the English names. E.g., when retrieve Chinese placese, using Chinese language rather than Pinyin, since there are many same Pinyin for difference characters. Similarly, there are many places have the same name, such as "Columbia" in the USA. Therefore, please ensure your input place name is correct. You can use nominatim.openstreetmap.org to determine the correct name in OpenStreetMap. 
 
