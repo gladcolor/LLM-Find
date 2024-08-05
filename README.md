@@ -28,6 +28,7 @@ LLM-Find Agent workflow
 # Installation
 
 - Clone or download the repository, rename `your_config.ini` as `config.ini`. Then, put your OpenAI API key and other keys in the `config.ini` file. Please use GPT-4o, the lower versions may not have enough  ability to generate correct code.
+- If you need to download data from [OpenWeather](https://openweathermap.org/api), [US Census](https://api.census.gov/data/key_signup.html), and [OpenTopography](https://opentopography.org/developers), please apply their API keys and put them in the `config.ini` file. 
 - Install the Python packages in the top cell.
 
 - If you have difficulties installing `GeoPandas` in Windows, refer to this [post](https://geoffboeing.com/2014/09/using-geopandas-windows/). 
