@@ -6,7 +6,7 @@ This study proposes LLM-Find, an autonomous agent framework to select geospatial
 
 We tested various data cases; by accepting data requests in natural language, most of the requests got correct data in an about 80% success rate. We feel excited about that because the success of such data fetching  agent indicates that the data intensive GIS research or boarder scientific research can be executed by agents. Autonomous research agents can collect necessary online or local data and then conduce analysis parallely while adjust methods or strategies for better results. LLM-Find will be a foundational role in such a bright vision. 
 
-QGIS users can download the plugin (GeoAgent-DataRetriever), and then download the data via natural language. Note that for some data source you may need to apply API keys. The source code of the QGIS plugin is [here](https://github.com/Teakinboyewa/AutonomousGIS_GeodataRetrieverAgent).
+QGIS users can download the plugin (AutonomousGIS-GeodataRetrieverAgent), and then download the data via natural language. Note that for some data source you may need to apply API keys. The source code of the QGIS plugin is [here](https://github.com/Teakinboyewa/AutonomousGIS_GeodataRetrieverAgent).
  
 For more details, please refer to our paper: Ning, Huan, Zhenlong Li, Temitope Akinboyewa, and M. Naser Lessani. 2024. “LLM-Find: An Autonomous GIS Agent Framework for Geospatial Data Retrieval.” arXiv. https://doi.org/10.48550/arXiv.2407.21024.
 
@@ -43,7 +43,7 @@ LLM-Find Agent workflow
 
 
 # Case studies
-Please play with the provided cases (~70), we also encourage you use your own cases. These case studies are designed to show the concepts of autonomous data fetching agents. Please use GPT-4o or above; the lower version of GPT will fail to generate the correct code and results. Note every time GPT-4o generates different outputs, your results may look different. Per our test, the generated program may fail at a chance about 10%; if so, please re-run all the cells again; no need to manually debug the code unless you like to do so. 
+Please play with the [provided cases (~70)](https://github.com/gladcolor/LLM-Find/blob/master/LLM_Find.ipynb), we also encourage you use your own cases. These case studies are designed to show the concepts of autonomous data fetching agents. Please use GPT-4o or above; the lower version of GPT will fail to generate the correct code and results. Note every time GPT-4o generates different outputs, your results may look different. Per our test, the generated program may fail at a chance about 10%; if so, please re-run all the cells again; no need to manually debug the code unless you like to do so. 
 
 When fetching OpenStreetMap data and images, for those places do not use English, we encourage you to input the names written in local language. Such two data sources are more friendly correctly with the native language names than the English names. E.g., when retrieve Chinese placese, using Chinese language rather than Pinyin, since there are many same Pinyin for difference characters. Similarly, there are many places have the same name, such as "Columbia" in the USA. Therefore, please ensure your input place name is correct. You can use nominatim.openstreetmap.org to determine the correct name in OpenStreetMap. 
 
@@ -54,6 +54,10 @@ The LLM-Find agent downloaded satellite image of the FAST Telescope from ESRI Wo
 ![img_2.png](images/weather.png)
 
 The LLM-Find agent downloaded 16-day daily weather forecast for Kabul, Afghanistan.
+
+
+![img.png](Nigeria.png)
+ The [QGIS plugin (AutonomousGIS-GeodataRetrieverAgent)](https://github.com/Teakinboyewa/AutonomousGIS_GeodataRetrieverAgent)) and its downloaded geospatial data of Nigeria, including city points, river polylines, and state boundaries (polygons) from OpenStreetMap. The image basemap was downloaded from ESRI World Imagery. Note that there are four individual data requests to retrieve the shown data, rather than one data request for four datasets. Each request is a short and sample such as “Download the rivers in Nigeria”. Users only need to type this sentence in the “Data request” textbox at the plugin's bottom. 
 
 # To Do
 - Needs a data assessment module.
