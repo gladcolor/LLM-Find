@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/plugins/AGGRA" >
-        <file>icon.png</file>
-    </qresource>
-</RCC>
