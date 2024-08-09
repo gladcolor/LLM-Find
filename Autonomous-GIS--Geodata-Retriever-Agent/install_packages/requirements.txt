@@ -1,9 +1,0 @@
-openai
-pyvis
-langchain-openai
-nest-asyncio
-rasterio
-osmnx
-pyogrio
-fiona
-geopandas
