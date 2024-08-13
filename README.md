@@ -1,4 +1,4 @@
-# LLM-Find: an autonomous agent framework for geospatial data fetching
+# An autonomous agent framework for geospatial data fetching
 
 Geographic information system (GIS) users and analyst need to fetching geospatial data for analysis or research tasks. Data fetching can be time-consuming and label intensive. Is it possible to fetching with less pain and time? This study tried to create an autonomous fetching agent for GIS analysts and then make them more focus on their creative work.
 
