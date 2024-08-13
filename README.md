@@ -57,7 +57,9 @@ The LLM-Find agent downloaded 16-day daily weather forecast for Kabul, Afghanist
 
 
 ![img.png](Nigeria.png)
- The [QGIS plugin (AutonomousGIS-GeodataRetrieverAgent)](https://github.com/Teakinboyewa/AutonomousGIS_GeodataRetrieverAgent)) and its downloaded geospatial data of Nigeria, including city points, river polylines, and state boundaries (polygons) from OpenStreetMap. The image basemap was downloaded from ESRI World Imagery. Note that there are four individual data requests to retrieve the shown data, rather than one data request for four datasets. Each request is a short and sample such as “Download the rivers in Nigeria”. Users only need to type this sentence in the “Data request” textbox at the plugin's bottom. 
+ The [The QGIS plugin of the GeoData Retrieve Agent](https://github.com/Teakinboyewa/AutonomousGIS_GeodataRetrieverAgent)) and the downloaded geospatial data of Nigeria,including cities (point), rivers (polyline), and state boundaries (polygon) from OpenStreetMap. The imagebasemap was downloaded from ESRI World Imagery using the plugin. Note that there are four individualdata requests to retrieve the shown data (e.g., “Download the rivers in Nigeria.”) 
+
+(PDF) An Autonomous GIS Agent Framework for Geospatial Data Retrieval. Available from: https://www.researchgate.net/publication/382233708_An_Autonomous_GIS_Agent_Framework_for_Geospatial_Data_Retrieval [accessed Aug 13 2024].
 
 # To Do
 - Needs a data assessment module.
