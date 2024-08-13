@@ -13,7 +13,7 @@ For more details, please refer to our paper: Ning, Huan, Zhenlong Li, Temitope A
 
 Reference: [Autonomous GIS: the next-generation AI-powered GIS](https://www.tandfonline.com/doi/full/10.1080/17538947.2023.2278895). Recommended citation format: Li Z., Ning H., 2023. Autonomous GIS: the next-generation AI-powered GIS. Interntional Journal of Digital Earth. https://doi.org/10.1080/17538947.2023.2278895. GitHub repository: github.com/gladcolor/LLM-Geo
 
-Note:  We are still developing LLM-Find, and the ideas presented in the paper may change due to the rapid development of AI. We hope LLM-Find can inspire GIScience professionals to further investigate on autonomous GIS.    
+Note:  LLM-Find is under active development, and the ideas presented in the paper may change due to the rapid development of AI. We hope LLM-Find can inspire geospatial community to further investigate on autonomous GIS.    
 
 ![img.png](images/framework.png)
 
