@@ -63,6 +63,7 @@ The LLM-Find agent downloaded 16-day daily weather forecast for Kabul, Afghanist
 - Develop a data assessment module.
 - Refactor the LLM_Find_Constants.py: split it out as individual data source and handbooks.
 - Issue 1: We observed that GPT cannot correct the contaminated information even adding instructions in the prompt. E.g., it has about 50% chance to ignore the instruction of "using `relation(osm_id)` rather than `area(osm_id)`". Thus, we have to replace the string using Python code.
+- Adding current time to the prompt.
 
 
 # Note:
