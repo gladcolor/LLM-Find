@@ -6,7 +6,7 @@ This study proposes LLM-Find, an autonomous GIS agent framework to retrieve geos
 
 We tested various data cases; by accepting data requests in natural language, most of the requests got correct data in an about 80% - 90% success rate. We feel excited about that because the success of such data fetching  agent indicates that the data intensive GIS research or boarder scientific research can be executed by agents. Autonomous research agents can collect necessary online or local data and then conduce analysis parallely while adjust methods or strategies for better results. LLM-Find will be a foundational role in such a bright vision. 
 
-QGIS users can download the QGIS plugin (AutonomousGIS-GeodataRetrieverAgent) to download the data via natural language in an GIS environment. Note that for some data source you may need to apply API keys. The source code of the QGIS plugin is [here](https://github.com/Teakinboyewa/AutonomousGIS_GeodataRetrieverAgent).
+QGIS users can download the QGIS plugin (AutonomousGIS-GeodataRetrieveAgent) to download the data via natural language in an GIS environment. Note that for some data source you may need to apply API keys. The source code of the QGIS plugin is [here](https://github.com/Teakinboyewa/AutonomousGIS_GeodataRetrieverAgent). QGIS Plugin page: https://plugins.qgis.org/plugins/AutonomousGIS_GeodataRetrieverAgent/
  
 For more details, please refer to our paper: Ning, Huan, Zhenlong Li, Temitope Akinboyewa, and M. Naser Lessani. 2024. “LLM-Find: An Autonomous GIS Agent Framework for Geospatial Data Retrieval.” arXiv. https://doi.org/10.48550/arXiv.2407.21024.
 
