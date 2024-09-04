@@ -1,0 +1,88 @@
+# provide a brief introduction of the data source to inform AI whether need to use this data source.
+brief_introduction = '''
+
+'''
+
+# Put the API key below if the data source needs
+API_key = ''
+
+# Put the technical requirements or details for the data source. One line for a requirement. No need to number them.
+hand_books = '''
+
+'''
+
+code_example = '''
+## The following code is to download the railway network in Wuhan, Hubei, China.
+# Import necessary libraries
+import geopandas as gpd
+import requests
+import json
+import osmnx as ox
+
+def download_data():
+    # Define the area for Wuhan, Hubei, China
+    place_name = "Wuhan, Hubei, China"
+
+    # Get the bounding box of Wuhan using OSMnx
+    gdf = ox.geocode_to_gdf(place_name)
+    west, south, east, north = gdf.unary_union.bounds
+
+    # Define Overpass API query to get railway network in the bounding box
+    overpass_url = "https://overpass-api.de/api/interpreter"
+    overpass_query = f"""
+    [out:json];
+    (
+        way["railway"]({south},{west},{north},{east});
+        relation["railway"]({south},{west},{north},{east});
+    );
+    out geom;
+    """
+
+    # Send request to Overpass API
+    response = requests.get(overpass_url, params={'data': overpass_query})
+    response.raise_for_status()  # Automatically raises an error for bad status codes
+
+    # Parse the JSON response
+    data = response.json()
+
+    # Extract elements with their geometries
+    features = []
+    for element in data['elements']:
+        if 'geometry' in element:
+            points = [(point['lon'], point['lat']) for point in element['geometry']]
+            # Convert all property values to str
+            properties = {
+                key: ', '.join(map(str, value)) if isinstance(value, list) else str(value)
+                for key, value in element.items() if key != 'geometry'
+            }
+
+            if element['type'] == 'way':
+                features.append({
+                    'type': 'Feature',
+                    'geometry': {'type': 'LineString', 'coordinates': points},
+                    'properties': properties
+                })
+            elif element['type'] == 'relation':
+                for member in element['members']:
+                    if member['type'] == 'way' and 'geometry' in member:
+                        points = [(point['lon'], point['lat']) for point in member['geometry']]
+                        properties = {
+                            key: ', '.join(map(str, value)) if isinstance(value, list) else str(value)
+                            for key, value in element.items() if key != 'geometry'
+                        }
+                        features.append({
+                            'type': 'Feature',
+                            'geometry': {'type': 'LineString', 'coordinates': points},
+                            'properties': properties
+                        })
+
+    # Create a GeoDataFrame
+    gdf_railway = gpd.GeoDataFrame.from_features(features, crs='EPSG:4326')
+
+    # Save to GeoPackage
+    output_file = r"E:\OneDrive_PSU\OneDrive - The Pennsylvania State University\Research_doc\LLM-Find\Downloaded_Data\Wuhan_Railway_network.gpkg"
+    gdf_railway.to_file(output_file, layer='railway_network', driver='GPKG')
+
+# Execute the function
+download_data()
+'''

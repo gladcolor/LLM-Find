@@ -1,0 +1,108 @@
+# provide a brief description (1 line) of the data source to inform AI whether need to use this data source.
+# Need to contain critical information such as extent and period.
+brief_description = '''
+You can download the administrative boundaries, street networks, points of interest (POIs) from OpenStreetMap.
+'''
+
+# Put the technical requirements or details for the data source. One line for a requirement. No need to number them.
+hand_books = '''
+"You may use the Overpass API, which is faster than OSMnx library.", 
+               "If you need to download the administrative boundary of only one place from OpenStreetMap, please use a Python package named 'OSMnx' by this code line: `gdf = ox.geocode_to_gdf(place_name)`. This method is fast and recommended. You do not need to use Overpass and then parse the reply.",
+                "The overall workflow for fetching data within a place's boundary: 1) get the requested place's osm_id by `osm_id = ox.geocode_to_gdf(place_name)['osm_id'][0]`; 2) form the Overpass query. E.g., `f'relation({osm_id}); map_to_area->.rel; way(area.rel)[railway];'` 3) fetch and save the data.",
+               "The reason of using `ox.geocode_to_gdf()' to get the osm_id is that this function uses Nominatim API to convert the fuzzy place name into a polygon that most match the given place name, rather than exact matching, which may not return the requested polygon.",
+               # "If you need to download polylines, you may use the Overpass API, which is faster than OSMnx library.",
+               # 
+               # "You can use the bounding box in the Overpass query to filter out the data extent (`west, south, east, north = ox.geocode_to_gdf(place_name).unary_union.bounds`), and using the tags to filter out the data type. DO NOT download all the data first then filter, which it is not feasible. After getting the data in a bounding box, you can use GeoPandas and the boundary to filter out the data in the target area: `gpd.sjoin(gdf, boundary, how='inner', op='within')`.",
+                "If you need to use a boundary to filter features in GeoPandas, this is the code: `gpd.sjoin(gdf, boundary, how='inner', op='within')`.",
+                "If you need to download multiple administrative boundaries at the same level, e.g., states or provinces, DO NOT use OSMnx because it is slow. You can use Overpass API. Example code: `area['ISO3166-1'='US'][admin_level=2]->.us;(relation(area.us)['admin_level'='4'];);out geom;`. Overpass API is  quicker and simpler; you only need to carefully set up the administrative level.",                
+                "Only use OSMnx to obtain the place boundaries; do no use it to download networks or POIs as it is very slow! Instead, use Overpass Query (endpoint: https://overpass-api.de/api/interpreter).",
+                "If using Overpass API, you need to output the geometry, i.e., using `out geom;` in the query. The geometry can be accessed by `returned_json['elements']['geometry']`; the geomtry is a list of points as `{'lat': 30.5, 'lon': 114.2}`.",
+                "If you need to determine the requested area of some small cities or places, try not to use the 'admin_level' tag, because you may not know its admin_level correctly. E.g., `area[name=small_place]` is better than `relation[name=small_place][admin_level=6]`, level=6 may be wrong. DO NOT assume the admin_level which lower than 4.",
+                "Use GeoPandas, rather than `osgeo` Python package, to create vectors.",
+                "If the file saving format is not given in the tasks, save the downloaded files into GeoPackage format.",
+                "You need to create Python code to download and save the data. Another program will execute your code directly.",
+                "Put your reply into a Python code block, explanation or conversation can be Python comments at the beginning of the code block(enclosed by ```python and ```).",
+                "The download code is only in a function named 'download_data()'. The last line is to execute this function.",
+                "When downloading OSM data, no need to use 'building' tags if it is not asked for.",
+                "You need to keep most attributes of the downloaded data, such as place name, street name, road type, and level.",
+                "Throw an error if the program fails to download the data; no need to handle the exceptions.",
+                "If you need to convert the OpenStreetMap returned JSON to GeoJSON, you can add this line to the OverPass query: `item ::=::,::geom=geom(),_osm_type=type(), ::id=id();`. Note the converted GeoJSON may only contains polygons, no polygons.",
+               f"This is a program for your reference; you can improve the data parsing but please keep the pipeline to form the Overpass queries (i.e., `f'relation(osm_id); map_to_area->.rel;`, do not use ``area(osm_id)), which has been manually verified: {codebase.OpenStreetMap_code_sample_2}",
+
+'''
+
+code_example = '''
+## The following code is to download the railway network in Wuhan, Hubei, China.
+# Import necessary libraries
+import geopandas as gpd
+import requests
+import json
+import osmnx as ox
+
+def download_data():
+    # Define the area for Wuhan, Hubei, China
+    place_name = "Wuhan, Hubei, China"
+
+    # Get the bounding box of Wuhan using OSMnx
+    gdf = ox.geocode_to_gdf(place_name)
+    west, south, east, north = gdf.unary_union.bounds
+
+    # Define Overpass API query to get railway network in the bounding box
+    overpass_url = "https://overpass-api.de/api/interpreter"
+    overpass_query = f"""
+    [out:json];
+    (
+        way["railway"]({south},{west},{north},{east});
+        relation["railway"]({south},{west},{north},{east});
+    );
+    out geom;
+    """
+
+    # Send request to Overpass API
+    response = requests.get(overpass_url, params={'data': overpass_query})
+    response.raise_for_status()  # Automatically raises an error for bad status codes
+
+    # Parse the JSON response
+    data = response.json()
+
+    # Extract elements with their geometries
+    features = []
+    for element in data['elements']:
+        if 'geometry' in element:
+            points = [(point['lon'], point['lat']) for point in element['geometry']]
+            # Convert all property values to str
+            properties = {
+                key: ', '.join(map(str, value)) if isinstance(value, list) else str(value)
+                for key, value in element.items() if key != 'geometry'
+            }
+
+            if element['type'] == 'way':
+                features.append({
+                    'type': 'Feature',
+                    'geometry': {'type': 'LineString', 'coordinates': points},
+                    'properties': properties
+                })
+            elif element['type'] == 'relation':
+                for member in element['members']:
+                    if member['type'] == 'way' and 'geometry' in member:
+                        points = [(point['lon'], point['lat']) for point in member['geometry']]
+                        properties = {
+                            key: ', '.join(map(str, value)) if isinstance(value, list) else str(value)
+                            for key, value in element.items() if key != 'geometry'
+                        }
+                        features.append({
+                            'type': 'Feature',
+                            'geometry': {'type': 'LineString', 'coordinates': points},
+                            'properties': properties
+                        })
+
+    # Create a GeoDataFrame
+    gdf_railway = gpd.GeoDataFrame.from_features(features, crs='EPSG:4326')
+
+    # Save to GeoPackage
+    output_file = r"E:\OneDrive_PSU\OneDrive - The Pennsylvania State University\Research_doc\LLM-Find\Downloaded_Data\Wuhan_Railway_network.gpkg"
+    gdf_railway.to_file(output_file, layer='railway_network', driver='GPKG')
+
+# Execute the function
+download_data()
+'''
