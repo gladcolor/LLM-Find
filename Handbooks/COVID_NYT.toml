@@ -14,7 +14,7 @@ US COVID-19 data by New York Times. Cumulative counts of COVID-19 cases and deat
 
 # Put the technical requirements or details for the data source. One line for a requirement. No need to number them.
 handbook = '''
-he COVID-19 cumulative death and case data can be accessed via: https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties-{year}.csv, year can be 2021, 2022,and 2023.
+The COVID-19 cumulative death and case data can be accessed via: https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties-{year}.csv, year can be 2021, 2022,and 2023.
 The CSV columns are: `date,county,state,fips,cases,deaths`, the data line can be: `2020-01-21,Washington,53,1,0`. Note that the data-type of `fips` column is string, while the `case` and `deaths` are integer. You need to store the data type correctly.
 Put your reply into a Python code block. Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).
 The download code is only in a function named 'download_data()'. The last line is to execute this function.

@@ -49,7 +49,7 @@ When fetching OpenStreetMap data and images, for those places do not use English
 
 ![img.png](images/FAST.png)
 
-The LLM-Find agent downloaded satellite image of the FAST Telescope from ESRI World Imagery.
+The LLM-Find agent downloaded satellite image of the FAST Telescope from ESRI World Imagery. (Note: This feature has be removed from OpenstreetMap on Aug. 29, 2024: https://www.openstreetmap.org/way/384699313. Do not test this case for now.)
 
 ![img_2.png](images/weather.png)
 
