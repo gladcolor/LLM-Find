@@ -15,7 +15,7 @@ import traceback
 
 #load config
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read(os.path.join('Keys' 'config.ini'))
 
 # use your KEY.
 OpenAI_key = config.get('API_Key', 'OpenAI_key')

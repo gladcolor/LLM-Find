@@ -26,8 +26,8 @@ config = load_config()
 
 # use your KEY.
 # OpenAI_key = config.get('API_Key', 'OpenAI_key')
-OpenWeather_key = config.get('API_Key', 'OpenWeather_key')
-US_Census_key = config.get('API_Key', 'US_Census_key')
+# OpenWeather_key = config.get('API_Key', 'OpenWeather_key')
+# US_Census_key = config.get('API_Key', 'US_Census_key')
 
 
 # print("OpenAI_key:", OpenAI_key)

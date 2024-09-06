@@ -1,0 +1,128 @@
+# The ID of the data source is the name of this file. Should be short, consists of one or two words. No space and special characters. Hyphen ("_") is allowed. The ID is for the program identify the data source.
+
+# Data source name. Should be clear, meaningful, and human readable.
+data_source_name = 'US Census Bureau demography'
+
+
+# provide a brief description (1 line) of the data source to inform AI whether need to use this data source.
+# Need to contain critical information such as extent and period.
+brief_description = '''
+It provides the demographic and socio-economic data, such as population, gender, income, education, and race.
+'''
+
+
+# Put the technical requirements or details for the data source. One line for a requirement. No need to number them.
+handbook = '''
+If you need an API key, you can use this: {US_Census_demography}
+Prefer the office APIs, do not use other Python pacakges such as `census`. This is an example: https://api.census.gov/data/2019/acs/acs1?get=NAME,B01001_001E&for=state:*
+Store the returns into CSV files.
+The latest data usually have 3 years time lag. E.g., in 2024, we can only request data of 2021.
+Use 'variable_name + label' as descriptive headers without special characters; e.g.'B01001_002E:Total:!!Male:', the variable label should come from the `label` value in the variable descriptions in https://api.census.gov/data/2022/acs/acs5/variables.json. Note that you may need to change the year and dataset accordingly. You need to download this JSON file and read the variable labels from it. Remove any 'Estimate!!' of the labels in variables.json file.
+Add the year of the data as a column to the saved CSV files.
+Add the source of the data as a column to the saved CSV files, such as 'ACS 2021'.
+The variable column names in the saved CSV files should be 'B01001_002E:Total:!!Male:', containing the variable ID and label.
+Put your reply into a Python code block. Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).
+The download code is only in a function named 'download_data()'. The last line is to execute this function.
+Add the variable description as Python comments before the queried variables, e.g. `# B15001_001E:Total population`.
+The Census Bureau APIs provide very fine-grained variables, such as `B01001_018E` for male between 60 and 61 years. Some data requests involve multiple variables; you need to carefully use these variables. No more or no less. E.g., higher education attainments need to contain all degrees higher than bachelor for both female and male, if the sex is not explicitly requested in the mission..
+The population needs to contain both male and female, if the sex is not explicitly requested in the mission.
+DO not query only male or female population if the sex is not explicitly requested in the mission.
+DO NOT handle any exceptions since we need to error information for debug.
+Keep the identifiers of downloaded data: for states and counties, names and FIPS are required; for tract, blockgroup, only FIPS is needed.
+Note that in the API response headers, 'NAME' can refer to state name, 'state' refers to FIPS, not the state name. Do not mix up!
+In the GET request, the parameters 'state' and 'county' are not included.
+If requesting total population, carefully consider whether it refers to the entire population of a place or the population of a topic. E.g., B15002_001E (label: Estimate!!Total:) refers to the total population of the concept of 'SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER'; B01001_001E (label: Estimate!!Total:) refers to the total population of the concept of 'SEX BY AGE', or the total population of a place. Make sure you carefully understand which `total population` is requested in the mission.
+Carefully think whether the requested data needs to combine multiple Census variables. For example, 'senior population' and 'higher education attainment' needs retrieve multiple variables across age, gender and degree attainment.
+Sometimes you do not need to retrieve multiple variables, since some variables may include others. E.g., B15003_022E (Estimate!!Total:!!Bachelor's degree) consists of B15002_015E (Estimate!!Total:!!Male:!!Bachelor's degree) and B15002_032E (Estimate!!Total:!!Female:!!Bachelor's degree). You can retrieve less variable in such occasions.
+Please return the total population/household along with the requested sub group populations to compute the ratio, which is usually needed in most analyses.
+FIPS or GEOID columns may be str type with leading zeros (digits: state: 2, county: 5, tract: 11, block group: 12).
+If the saved file name is given, do not change the file name.
+This is a brief variable summary for your reference: {Census_variables}
+This is a program for your reference, note that you can improve it: {code_example}
+'''
+
+Census_variables = '''
+B01001_001E - B01001_049E: male and female population by age.
+B02001_001E - B02013_001E: population by race.
+B14001_001E - B14001_010E: school enrollment by level of school for the population 3 years and over.
+B15003_001E - B15003_025E: educational attainment for the population 25 years and over.
+B17026_001E - B17026_013E: ratio of income to poverty level of families in the past 12 months.
+B19001_001E - B19001_017E: household income in the past 12 months.
+B19013_001E: median household income in the past 12 months.
+B19101_001E - B19101_017E: family income in the past 12 months.
+B23025_001E - B23025_007E：employment status for the population 16 years and over.
+B25091_001E - B25091_023E: mortgage status by selected monthly owner costs as a percentage of household income in the past 12 months.
+B27001_001E - B27001_057E：male and female population health insurance coverage status.
+C17002_001E - C17002_008E: ratio of income to poverty level in the past 12 months.
+'''
+
+code_example = '''
+
+
+import requests
+import csv
+import json
+
+def download_data():
+    # Define the endpoint and related configurations
+    base_url = "https://api.census.gov/data/2021/acs/acs5"
+    api_key = "xxxx"
+    dataset_year = "2021"
+    dataset_source = f"ACS {dataset_year}"
+
+    # Variables we need to fetch
+    variables = [
+        # B02001_001E:Total population
+        "B02001_001E",
+        # B02001_002E:White alone
+        "B02001_002E",
+        # B02001_003E:Black or African American alone
+        "B02001_003E",
+        # B02001_004E:American Indian and Alaska Native alone
+        "B02001_004E",
+        # B02001_005E:Asian alone
+        "B02001_005E",
+        # B02001_006E:Native Hawaiian and Other Pacific Islander alone
+        "B02001_006E",
+        # B02001_007E:Some other race alone
+        "B02001_007E",
+        # B02001_008E:Two or more races
+        "B02001_008E",
+    ]
+
+    # Fetch the variable labels
+    response = requests.get(f"{base_url}/variables.json")
+    variables_metadata = response.json()
+
+    # Helper function to get variable labels
+    def get_variable_label(var_name):
+        label = variables_metadata['variables'][var_name]['label']
+        return label.replace("Estimate!!", "").strip()
+
+    # Construct the URL for the data request
+    get_vars = ",".join(variables)
+    url = f"{base_url}?get={get_vars}&for=block%20group:*&in=state:45 county:079&key={api_key}"
+
+    # Download data from Census API
+    response = requests.get(url)
+    response.raise_for_status()
+    data = response.json()
+
+    # Prepare the CSV file for writing
+    csv_path = "Census_SC_Richland_race_population.csv"
+
+    # Create header with variable labels
+    header = [f"{var}:{get_variable_label(var)}" for var in variables] + ["state_fips", "county_fips", "tract_fips", "block_group_fips", "year", "source"]
+    rows = data[1:]  # Skip the header row provided by API
+    for row in rows:
+        row.extend([dataset_year, dataset_source])
+
+    # Write to CSV file
+    with open(csv_path, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(header)
+        writer.writerows(rows)
+
+# Execute the function
+download_data()
+'''

@@ -1,0 +1,147 @@
+# The ID of the data source is the name of this file. Should be short, consists of one or two words. No space and special characters. Hyphen ("_") is allowed. The ID is for the program identify the data source.
+
+# Data source name. Should be clear, meaningful, and human readable.
+data_source_name = 'ESRI World Imagery (for Export)'
+
+
+# provide a brief description (1 line) of the data source to inform AI whether need to use this data source.
+# Need to contain critical information such as extent and period.
+brief_description = '''
+ESRI World Imagery (for Export). It is a web map service, providing satellite image tiles. You can download tiles and mosaic them into a large image.
+'''
+
+# Put the technical requirements or details for the data source. One line for a requirement. No need to number them.
+handbook = '''
+The endpoint is: https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{row}/{col}. 'row' is the row number from the top, 'col' is the column number from the left. The map projection is WGS 1984 Web Mercator (auxiliary sphere), EPSG: 3857.
+Save the downloaded image to a geo-tiff, and write down the bounding box to the geotiff tags.
+You will receive a place name or a bounding box of the target area.
+Try not to use `osgeo` Python package; it may have many errors.
+Put your reply into a Python code block. Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).
+The download code is only in a function named 'download_data()'. The last line is to execute this function; do not use `if __name__ == '__main__':`.
+If the requested area is provided as a place name, search its bounding box from OpenStreetMap, do not guess the lat/lon yourself since we need accurate results.
+If you use `ox.geocode_to_gdf(place)` to get the place boundary, note that this function return the first POLYGON result from the OpenStreetMap Nominatim 'search' endpoint. Thus, you are searching a POI (a single point), you can use Nominatim (do not forget to set the application name before get the data. Try the Nominatim first.
+Remember how to do name the tiles since you need to mosaic them later.
+DO NOT handle any exceptions since we need to error information for debug.
+This is a program for your reference, note that you can improve it: {code_example}
+'''
+
+code_example = '''
+
+
+import geopandas as gpd
+import osmnx as ox
+import requests
+import numpy as np
+from PIL import Image
+from osgeo import gdal
+import os
+from pyproj import Transformer
+import rasterio
+
+
+def download_data():
+    # Define the target area for which to download the data
+    place = 'Japan'
+
+    # Get the boundary of Japan
+    # get the first return's bounding box
+    url = f"https://nominatim.openstreetmap.org/search?q={place}&format=geojson"
+    response = requests.get(url, headers={"User-Agent":"LLM-Find/gladcolor@gmail.com"})
+    minx, miny, maxx, maxy = response.json()['features'][0]['bbox']
+
+    # extend the boundary for a point or to small:
+    if abs(maxx - minx) < 0.000001:  # note unit is degree
+         ext = 0.00005
+         maxx = maxx + ext
+         minx = minx - ext
+         maxy = maxy + ext
+         miny = miny - ext
+
+    # Set the zoom level
+    z = 4
+    n = 2 ** z
+
+    # Calculate the tiling scheme boundaries
+    tile_min_col = int((minx + 180.0) / 360.0 * n)
+    tile_max_col = int((maxx + 180.0) / 360.0 * n)
+    tile_min_row = int((1.0 - np.log(np.tan(np.radians(maxy)) + 1 / np.cos(np.radians(maxy))) / np.pi) / 2.0 * n)
+    tile_max_row = int((1.0 - np.log(np.tan(np.radians(miny)) + 1 / np.cos(np.radians(miny))) / np.pi) / 2.0 * n)
+
+    # Create directory to store individual tile images
+    save_dir = "tiles"
+    os.makedirs(save_dir, exist_ok=True)
+
+    # Download tiles
+    for row in range(tile_min_row, tile_max_row + 1):
+        for col in range(tile_min_col, tile_max_col + 1):
+            url = f"https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{row}/{col}"
+            response = requests.get(url)
+            tile_path = os.path.join(save_dir, f"{z}-{row}-{col}.jpg")
+            with open(tile_path, 'wb') as f:
+                f.write(response.content)
+
+    # Stitch the tiles to create a mosaic image
+    cols = tile_max_col - tile_min_col + 1
+    rows = tile_max_row - tile_min_row + 1
+    tile_width, tile_height = Image.open(os.path.join(save_dir, f"{z}-{tile_min_row}-{tile_min_col}.jpg")).size
+    mosaic = Image.new('RGB', (cols * tile_width, rows * tile_height))
+
+    for row in range(rows):
+        for col in range(cols):
+            tile_path = os.path.join(save_dir, f"{z}-{tile_min_row + row}-{tile_min_col + col}.jpg")
+            tile = Image.open(tile_path)
+            mosaic.paste(tile, (col * tile_width, row * tile_height))
+
+    # Save the mosaic image as a TIFF file
+    image_array = np.array(mosaic)
+
+        # Calculate the actual geographic bounds of the mosaic
+    def tile_to_lonlat(col, row, zoom):
+        n = 2.0 ** zoom
+        lon_deg = col / n * 360.0 - 180.0
+        lat_rad = np.arctan(np.sinh(np.pi * (1 - 2 * row / n)))
+        lat_deg = np.degrees(lat_rad)
+        return lon_deg, lat_deg
+
+    actual_min_lon, actual_max_lat = tile_to_lonlat(tile_min_col, tile_min_row, z)
+    actual_max_lon, actual_min_lat = tile_to_lonlat(tile_max_col + 1, tile_max_row + 1, z)
+
+       # Convert geographic bounds to Web Mercator
+    transformer = Transformer.from_crs("epsg:4326", "epsg:3857", always_xy=True)
+    actual_min_x, actual_min_y = transformer.transform(actual_min_lon, actual_min_lat)
+    actual_max_x, actual_max_y = transformer.transform(actual_max_lon, actual_max_lat)
+
+    # Set the bounding box for Web Mercator
+    actual_bounding_box_mercator = actual_min_x, actual_min_y, actual_max_x, actual_max_y
+    print("Actual Bounding Box in Web Mercator:", actual_bounding_box_mercator)
+
+    transform = from_bounds(*actual_bounding_box_mercator, width=mosaic.width, height=mosaic.height)
+
+    mosaic_path = "E:/OneDrive_PSU/OneDrive - The Pennsylvania State University/Research_doc/LLM-Find/Downloaded_Data/Japan_image.tif"
+    crs = {'init': 'epsg:3857'}
+
+    # Save the image as a GeoTIFF using rasterio
+    print(mosaic_path)
+    with rasterio.open(
+        mosaic_path,
+        'w',
+        driver='GTiff',
+        height=image_array.shape[0],
+        width=image_array.shape[1],
+        count=image_array.shape[2],  # Number of channels (e.g., 3 for RGB)
+        dtype=image_array.dtype,
+        crs=crs,
+        transform=transform
+    ) as dst:
+        # Write each channel separately
+        for i in range(1, image_array.shape[2] + 1):
+            print(i)
+            dst.write(image_array[:, :, i - 1], i)
+
+    # Clean up the individual tile images (optional)
+    for file in os.listdir(save_dir):
+        os.remove(os.path.join(save_dir, file))
+    os.rmdir(save_dir)
+
+download_data()
+'''

@@ -1,0 +1,67 @@
+# The ID of the data source is the name of this file. Should be short, consists of one or two words. No space and special characters. Hyphen ("_") is allowed. The ID is for the program identify the data source.
+
+# Data source name. Should be clear, meaningful, and human readable.
+data_source_name = 'OpenTopography'
+
+
+# provide a brief description (1 line) of the data source to inform AI whether need to use this data source.
+# Need to contain critical information such as extent and period.
+brief_description = '''
+You can download global digital elevation model (DEM) data using API; the resolution ranges from 15m to 1000m, such as SRTM GL3 (global 90m), and GL1 (global 30m). The DEM source list from this API contains: SRTMGL3, SRTMGL1, SRTMGL1_E, AW3D30, AW3D30, SRTM15Plus, NASADEM, COP30, COP30, EU_DTM, GEDI_L3, GEBCOIceTopo, GEBCOSubIceTopo.
+'''
+# "The free OT API key is rate limited to 500 calls per 24 hours.
+
+# Put the technical requirements or details for the data source. One line for a requirement. No need to number them.
+
+handbook = '''
+The OpenTopography API key is: {OpenTopography_key}
+The endpoint is: https://portal.opentopography.org/API/globaldem?demtype=SRTMGL3&south=50&north=50.1&west=14.35&east=14.6&outputFormat=GTiff&API_Key=XXX.
+The REST API parameter description: demtype: [SRTMGL3 (SRTM GL3 90m)， SRTMGL1 (SRTM GL1 30m)， SRTMGL1_E (SRTM GL1 Ellipsoidal 30m)， AW3D30 (ALOS World 3D 30m)， AW3D30_E (ALOS World 3D Ellipsoidal, 30m)， SRTM15Plus (Global Bathymetry SRTM15+ V2.1 500m)， NASADEM (NASADEM Global DEM)， COP30 (Copernicus Global DSM 30m)， COP90 (Copernicus Global DSM 90m)， EU_DTM (DTM 30m)， GEDI_L3 (DTM 1000m)， GEBCOIceTopo (Global Bathymetry 500m)， GEBCOSubIceTopo (Global Bathymetry 500m)]; south, north, west, and east: WGS 84 bounding box; outputFormat: 'GTiff' for GeoTiff, 'AAIGrid' for Arc ASCII Grid, 'HFA' for Erdas Imagine (.IMG).
+Shuttle Radar Topography Mission GL3 (Global 90m), GL1 (Global 30m), GL1 Ellipsoidal, ALOS World 3D (Global 30m), ALOS World 3D Ellipsoidal, Global Bathymetry and Topography at 15 Arc Sec: SRTM15+ V2.1, NASADEM (NASADEM Global DEM), COP30 (Copernicus Global DSM 30m), COP90 (Copernicus Global DSM 90m), Continental Europe Digital Terrain Model 30m, GEDI L3 (DTM 1000 meter), GEBCOIceTopo (Global Bathymetry 500m) and GEBCOSubIceTopo (Global Bathymetry 500m) data.
+You will receive a place name or a bounding box of the target area.
+Try not to use `osgeo` Python package; it may have many errors.
+Put your reply into a Python code block. Explanation or conversation can be Python comments at the begining of the code block(enclosed by ```python and ```).
+The download code is only in a function named 'download_data()'. The last line is to execute this function; do not use `if __name__ == '__main__':`.
+If the requested area is provided as a place name, search its bounding box from OpenStreetMap, do not guess the lat/lon yourself since we need accurate results.
+If you use `ox.geocode_to_gdf(place)` to get the place boundary, note that this function return the first POLYGON result from the OpenStreetMap Nominatim 'search' endpoint. Thus, you are searching a POI (a single point), you can use Nominatim (do not forget to set the application name before get the data. Try the Nominatim first.
+To the get bounding box, you can use `gdf = ox.geocode_to_gdf(place_name); west, south, east, north = gdf.unary_union.bounds`.
+DO NOT handle any exceptions since we need to error information for debug.
+This is a program for your reference, note that you can improve it: {code_sample}
+'''
+
+code_example = '''
+
+
+import requests
+import osmnx as ox
+
+def download_data():
+    place_name = "Great Smoky Mountains National Park, USA"
+
+    # Get the bounding box for the place name
+    gdf = ox.geocode_to_gdf(place_name)
+    west, south, east, north = gdf.unary_union.bounds
+
+    # Set the OpenTopography API parameters
+    demtype = "SRTMGL3"  # This is 90m resolution
+    output_format = "GTiff"
+    api_url = (
+        f"https://portal.opentopography.org/API/globaldem?"
+        f"demtype={demtype}&south={south}&north={north}&west={west}&east={east}&outputFormat={output_format}&API_Key=XXXX"
+    )
+
+    # Send the request to download the data
+    response = requests.get(api_url)
+
+    # Raise an exception if the request was unsuccessful
+    response.raise_for_status()
+
+    # Save the downloaded data to the specified path
+    output_path = r"E:\Great Smoky Mountains National Park.tif"
+
+    with open(output_path, 'wb') as file:
+        file.write(response.content)
+
+# Execute the function to download the data
+download_data()
+'''

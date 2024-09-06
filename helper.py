@@ -4,6 +4,8 @@ import traceback
 # import openai
 from collections import deque
 from openai import OpenAI
+from datetime import datetime
+
 
 import configparser
 
@@ -17,15 +19,19 @@ import networkx as nx
 import pandas as pd
 import geopandas as gpd
 from pyvis.network import Network
- 
+import configparser
 
 import LLM_Find_Constants as constants
+import handbook
 # from langchain_core.prompts import ChatPromptTemplate
 
+class CaseSensitiveConfigParser(configparser.ConfigParser):
+    def optionxform(self, optionstr):
+        return optionstr  # Override to preserve case sensitivity
 
 #load config
-config = configparser.ConfigParser()
-config.read('config.ini')
+config = CaseSensitiveConfigParser()
+config.read(os.path.join('Keys', 'config.ini'))
 
 # use your KEY.
 OpenAI_key = config.get('API_Key', 'OpenAI_key')
@@ -37,11 +43,13 @@ def load_OpenAI_key():
 
 def create_select_prompt(task):
     select_requirement_str = '\n'.join([f"{idx + 1}. {line}" for idx, line in enumerate(constants.select_requirements)])
+    handbook_files = handbook.collect_handbook_files()
+    descriptions_str, data_source_dict = handbook.assemble_handbook_description(handbook_files)
 
     prompt =  f"Your role: {constants.select_role} \n" + \
               f"Your mission: {constants.select_task_prefix}: " + f"{task}\n\n" + \
               f"Requirements: \n{select_requirement_str} \n\n" + \
-              f"Data sources:{constants.data_sources} \n" + \
+              f"Data sources:{descriptions_str} \n" + \
               f'Your reply example: {constants.selection_reply_example}'
 
     # print(prompt)
@@ -67,9 +75,12 @@ def convert_chunks_to_str(chunks):
 
 def create_download_prompt(task, selected_data_source, handbook_str):
     # select_requirement_str = '\n'.join([f"{idx + 1}. {line}" for idx, line in enumerate(constants.select_requirements)])
+    current_datetime = datetime.now()
+    formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M")
 
     prompt =  f"Your role: {constants.download_role} \n" + \
-              f"Your mission: {constants.download_task_prefix}: " + f"{task}\n\n" + \
+              f"Your mission: {constants.download_task_prefix}: " + f"{task}\n" + \
+              f"Current date-time: {formatted_datetime} \n\n" + \
               f"Data source:{selected_data_source} \n" + \
               f'Your reply example: {constants.download_reply_example}\n' + \
               f"Technical handbook: \n{handbook_str}"
