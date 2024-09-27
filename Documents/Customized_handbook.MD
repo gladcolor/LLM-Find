@@ -31,8 +31,8 @@ You need to replace the `XXX` using your real key and name the key. In the requi
 
 ## How to use code example and other variables in a handbook
 Similar to API key, you need a placeholder in the requirements in a handbook. For example, there is a requirement of `This is a program for your reference, note that you can improve it: {code_example}` in the `US_Census_demography.toml`, the placeholder of `{code_example}` will be replaced by the variable of `code_example` in the toml file. Also the placeholder of `{Census_variables}` will be replaced by the variable of `Census_variables` in the same toml file. Such a design aims to better organize and maintain the requirements in the handbook.
-`
-You need to replace the `XXX` using your real key and name the key. In the requirements in the `handbook`, you need to use a placeholder as `{OpenWeather}` to indicate the API key. LLM-Find will replace that placeholder using the key in the `OpenWeather.keys` file. 
+
+You need to replace the `XXX` using your real key and name the key. In the requirements in the `handbook`, you need to use a placeholder as `{OpenWeather}` to indicate the API key. LLM-Find will replace that placeholder using the key in the `OpenWeather.keys` file.  
 
 
 # Handbook organization
