@@ -11,11 +11,23 @@ jupyter lab
 
 conda activate ox
 
+cd D:\OneDrive_PSU\OneDrive - The Pennsylvania State University\Research_doc\LLM-Find\Python_code
+D:
+conda activate llm_geo
+jupyter lab
+
+
 conda install osmnx -c conda-forge --strict-channel-priority 
 
+conda install geopandas -c conda-forge --strict-channel-priority 
+
+ 
 
 conda config --prepend channels conda-forge
 conda create -n llm_geo --strict-channel-priority geopandas jupyterlab
+
+conda create -n ox --strict-channel-priority geopandas jupyterlab
+
 
 
 

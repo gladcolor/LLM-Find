@@ -6,6 +6,7 @@ from glob import glob
 import os
 import sys
 import logging
+import time
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class CaseSensitiveConfigParser(configparser.ConfigParser):
