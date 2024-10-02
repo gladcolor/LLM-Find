@@ -12,12 +12,14 @@ It provides the demographic and socio-economic data, such as population, gender,
 
 
 # Put the technical requirements or details for the data source. One line for a requirement. No need to number them.
-handbook = '''
+handbook = """
 If you need an API key, you can use this: {US_Census_demography}
-Prefer the office APIs, do not use other Python pacakges such as `census`. This is an example: https://api.census.gov/data/2019/acs/acs1?get=NAME,B01001_001E&for=state:*
-Store the returns into CSV files.
-The latest data usually have 3 years time lag. E.g., in 2024, we can only request data of 2021.
+Prefer the office APIs, do not use other Python pacakges such as `census`. This is an example requesting South Carolina counties population: https://api.census.gov/data/2019/acs/acs1?get=NAME,B01001_001E&for=county&in=state:45. The returned example are: ["NAME","B01001_001E","state","county"], ["Aiken County, South Carolina","170872","45","003"],...].
+This is an example requesting block group population in South Carolina: https://api.census.gov/data/2021/acs/acs5?get=B01003_001E&for=block group:*&in=state:45 county:*tract:*
+Note the nested geography hierarchy cannot skip. E.g, `for=block%20group:*&in=state:06&in=county:*&in=tract:*` is correct, `for=block%20group:*&in=state:06&in=county:*` is wrong.
+The latest data usually have 2 or 3 years time lag. E.g., in 2024, we can only request data of 2022 or 2021.
 Use 'variable_name + label' as descriptive headers without special characters; e.g.'B01001_002E:Total:!!Male:', the variable label should come from the `label` value in the variable descriptions in https://api.census.gov/data/2022/acs/acs5/variables.json. Note that you may need to change the year and dataset accordingly. You need to download this JSON file and read the variable labels from it. Remove any 'Estimate!!' of the labels in variables.json file.
+Store the returns into CSV files.
 Add the year of the data as a column to the saved CSV files.
 Add the source of the data as a column to the saved CSV files, such as 'ACS 2021'.
 The variable column names in the saved CSV files should be 'B01001_002E:Total:!!Male:', containing the variable ID and label.
@@ -30,16 +32,19 @@ DO not query only male or female population if the sex is not explicitly request
 DO NOT handle any exceptions since we need to error information for debug.
 Keep the identifiers of downloaded data: for states and counties, names and FIPS are required; for tract, blockgroup, only FIPS is needed.
 Note that in the API response headers, 'NAME' can refer to state name, 'state' refers to FIPS, not the state name. Do not mix up!
+When requesting the county data or finer data, the returned 'county' column is 3-digit FIPS, please combine the 'county' and other finer FIPS (e.g., 'tract', 'block group') columns with all the higher level FIPS (digits: state: 2, county: 5, tract: 11, block group: 12). E.g., using `county_fips = f'{state_fips}{row[-3]:03}'` to ensure the county FIPSs have 5 digits.
 In the GET request, the parameters 'state' and 'county' are not included.
 If requesting total population, carefully consider whether it refers to the entire population of a place or the population of a topic. E.g., B15002_001E (label: Estimate!!Total:) refers to the total population of the concept of 'SEX BY EDUCATIONAL ATTAINMENT FOR THE POPULATION 25 YEARS AND OVER'; B01001_001E (label: Estimate!!Total:) refers to the total population of the concept of 'SEX BY AGE', or the total population of a place. Make sure you carefully understand which `total population` is requested in the mission.
 Carefully think whether the requested data needs to combine multiple Census variables. For example, 'senior population' and 'higher education attainment' needs retrieve multiple variables across age, gender and degree attainment.
 Sometimes you do not need to retrieve multiple variables, since some variables may include others. E.g., B15003_022E (Estimate!!Total:!!Bachelor's degree) consists of B15002_015E (Estimate!!Total:!!Male:!!Bachelor's degree) and B15002_032E (Estimate!!Total:!!Female:!!Bachelor's degree). You can retrieve less variable in such occasions.
 Please return the total population/household along with the requested sub group populations to compute the ratio, which is usually needed in most analyses.
-FIPS or GEOID columns may be str type with leading zeros (digits: state: 2, county: 5, tract: 11, block group: 12).
 If the saved file name is given, do not change the file name.
 This is a brief variable summary for your reference: {Census_variables}
 This is a program for your reference, note that you can improve it: {code_example}
-'''
+"""
+# Decennial Census 2020 Supplemental Demographic and Housing Characteristics File (S-DHC) example: api.census.gov/data/2020/dec/sdhc?get=NAME&for=state:*&key=[user%20key]
+# Detailed Demographic and Housing Characteristics File A (Detailed DHC-A): https://api.census.gov/data/2020/dec/ddhca?get=NAME,POPGROUP_LABEL&POPGROUP=1002&for=state:*
+
 
 Census_variables = '''
 B01001_001E - B01001_049E: male and female population by age.
@@ -58,7 +63,7 @@ C17002_001E - C17002_008E: ratio of income to poverty level in the past 12 month
 
 code_example = '''
 
-
+# Program purpose: download the population by race of Richland County, South Carolina.
 import requests
 import csv
 import json
@@ -66,7 +71,7 @@ import json
 def download_data():
     # Define the endpoint and related configurations
     base_url = "https://api.census.gov/data/2021/acs/acs5"
-    api_key = "xxxx"
+    # api_key = "xxxx"
     dataset_year = "2021"
     dataset_source = f"ACS {dataset_year}"
 
@@ -101,8 +106,8 @@ def download_data():
 
     # Construct the URL for the data request
     get_vars = ",".join(variables)
-    url = f"{base_url}?get={get_vars}&for=block%20group:*&in=state:45 county:079&key={api_key}"
-
+    url = f"{base_url}?get={get_vars}&for=block%20group:*&in=state:45 county:079"
+  
     # Download data from Census API
     response = requests.get(url)
     response.raise_for_status()
@@ -114,8 +119,13 @@ def download_data():
     # Create header with variable labels
     header = [f"{var}:{get_variable_label(var)}" for var in variables] + ["state_fips", "county_fips", "tract_fips", "block_group_fips", "year", "source"]
     rows = data[1:]  # Skip the header row provided by API
-    for row in rows:
-        row.extend([dataset_year, dataset_source])
+    for idx, row in enumerate(rows):
+        # format the FIPS
+        state_fips = f"{row[-4]:02}"
+        county_fips = f"{state_fips}{row[-3]:03}"
+        tract_fips = f"{county_fips}{row[-2]:06}"
+        block_group_fips = f"{tract_fips}{row[-1]}"
+        rows[idx] = row[:-4] + [state_fips, county_fips, tract_fips, block_group_fips, dataset_year, dataset_source]
 
     # Write to CSV file
     with open(csv_path, mode='w', newline='') as file:
