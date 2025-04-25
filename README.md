@@ -72,6 +72,6 @@ The LLM-Find agent downloaded a 16-day daily weather forecast for Kabul, Afghani
 - You may need [OSMnx](https://osmnx.readthedocs.io/en/stable/) and [geopandas](https://geopandas.org/en/stable/getting_started.html#installation) packages to download and read vector files. Please install it in advance.
   
 # Change log
-- 2025-04-25, One guideline in the Handbook for Census Bureau boundary needs to be updated as: If using GeoPandas to load a zipped ESRI shapefile from a URL, do not use `gpd.read_file(URL)` because the Census Bureau has forbidden it. Download the zip file and use `gpd.read_file(zipfile)`.
+- 2025-04-25, a guideline in the Handbook for Census Bureau boundary needs to be updated: If using GeoPandas to load a zipped ESRI shapefile from a URL, do not use `gpd.read_file(URL)` because the Census Bureau has prohibited it. Download the zip file and use `gpd.read_file(zipfile)`.
 
 
