@@ -8,7 +8,7 @@ QGIS users can download the QGIS plugin (AutonomousGIS-GeodataRetrieveAgent) to 
 
 Please watch demonstrations on our [YouTubeChannel](https://www.youtube.com/watch?v=4otpdHUlpwE&list=PL6ON3gdLloDE9NynwhMxYNDoFukbNJnf1). 
  
-For more details, please refer to our paper: Ning, Huan, Zhenlong Li, Temitope Akinboyewa, and M. Naser Lessani. 2024. “LLM-Find: An Autonomous GIS Agent Framework for Geospatial Data Retrieval.” arXiv. https://doi.org/10.48550/arXiv.2407.21024.
+For more details, please refer to our paper: Ning, Huan, Zhenlong Li, Temitope Akinboyewa, and M. Naser Lessani. [An autonomous GIS agent framework for geospatial data retrieval](https://www.tandfonline.com/doi/full/10.1080/17538947.2025.2458688)
 
 
 Further reading: [Autonomous GIS: the next-generation AI-powered GIS](https://www.tandfonline.com/doi/full/10.1080/17538947.2023.2278895). Recommended citation format: Li Z., Ning H., 2023. Autonomous GIS: the next-generation AI-powered GIS. International Journal of Digital Earth. https://doi.org/10.1080/17538947.2023.2278895. GitHub repository: github.com/gladcolor/LLM-Geo
